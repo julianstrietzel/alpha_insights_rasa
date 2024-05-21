@@ -1,0 +1,95 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - hello there
+    - good morning
+    - good evening
+    - moin
+    - hey there
+    - let's go
+    - hey dude
+    - goodmorning
+    - goodevening
+    - good afternoon
+
+- intent: provide_user_id
+  examples: |
+    - The user ID is [1900413](user_id)
+    - The patient ID is [10](user_id)
+    - I am concerned about user [20078](user_id)
+    - We are looking into user [10435](user_id)
+    - The user ID is [76](user_id)
+    - user id: [1900413](user_id)
+    - user id: [10](user_id)
+    - patient id: [20078](user_id)
+    
+  
+
+- intent: goodbye
+  examples: |
+    - cu
+    - good by
+    - cee you later
+    - good night
+    - bye
+    - goodbye
+    - have a nice day
+    - see you around
+    - bye bye
+    - see you later
+
+
+- intent: blood_pressure_last_recorded
+  examples: |
+    - When was my last blood pressure reading taken?
+    - What is the date of my last blood pressure check?
+    - Can you tell me the last time I had my blood pressure checked?
+    - When did I last measure my blood pressure?
+    - What's the timestamp of my latest blood pressure reading?
+
+
+- intent: user_nickname
+  examples: |
+    - What is the nickname of user ID [1900413](user_id)?
+    - Can you tell me the nickname of user [10](user_id)?
+    - What's the nickname for user [20078](user_id)?
+    - Show me the nickname of user [10435](user_id)?
+    - What nickname does user ID [76](user_id) have?
+    - What is the nickname of the patient?
+    - Can you tell me the nickname of the patient?
+    - What's the nickname for the patient?
+    - Show me the nickname of the patient?
+    - What name does the patient have?
+    - What is the name of the patient?
+    - Can you tell me the name of the patient?
+    - What's the name of the user?
+    - Show me the name of the user?
+
+- intent: basic_user_details
+  examples: |
+    - What are the basic details of user ID [1900413](user_id)?
+    - Can you tell me the basic details of user [10](user_id)?
+    - What's the basic information for user [20078](user_id)?
+    - Show me the basic details of user [10435](user_id)?
+    - What basic information does user ID [76](user_id) have?
+    - What is the basic information of the patient?
+    - Can you tell me the basic information of the patient?
+    - What's the basic information for the patient?
+    - Show me the basic information of the patient?
+    - What basic information does the patient have?
+    - What is the basic information of the user?
+    - Can you tell me the basic information of the user?
+    - What's the basic information for the user?
+    - Show me the basic information of the user?
+    - What basic information does the user have?
+    - What is the basic information of the patient?
+    - Can you tell me the basic information of the patient?
+    - What's the basic information for the patient?
+    - Show me the basic information of the patient?
+    - What basic information does the patient have?
+    - What is the basic information of the user?

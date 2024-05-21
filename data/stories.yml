@@ -1,0 +1,15 @@
+version: "3.1"
+
+stories:
+
+- story: greet and intro
+  steps:
+  - intent: greet
+  - action: utter_ask_user_id
+  - intent: provide_user_id
+  - action: action_get_basic_user_details
+
+- story: basic_user_details
+  steps:
+  - intent: basic_user_details
+  - action: action_get_basic_user_details
