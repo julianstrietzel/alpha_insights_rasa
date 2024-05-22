@@ -7,6 +7,16 @@ intents:
   - user_nickname
   - provide_user_id
   - basic_user_details
+  - blood_pressure_trends_three_months
+  - blood_pressure_time_of_day
+  - critical_blood_pressure_alerts
+  - location_specific_blood_pressure
+  - blood_pressure_home_vs_other
+  - user_medical_preconditions
+  - blood_pressure_trend_changed_since_date
+  - high_bloodpressure_readings
+  - ask_gpt
+
 
 responses:
   utter_greet:
@@ -15,7 +25,7 @@ responses:
           name: user_id
           value: "-1"
       text: "Hey! Please provide the user ID of your patient."
-    - text: "Hey! How are you?"
+    - text: "Hey! I am a health assistant. How can I help you today?"
 
   utter_goodbye:
     - text: "Bye"
@@ -32,17 +42,84 @@ session_config:
 
 entities:
   - user_id
+  - type
+  - direction
+  - limit
+  - date
 
 slots:
   user_id:
     type: text
     initial_value: "-1"
     mappings:
-      - type: from_entity
-        entity: user_id
+    - type: from_entity
+      entity: user_id
+      intent: provide_user_id
+    - type: custom
+  context:
+    type: text
+    mappings:
+    - type: custom
+      intent: ask_gpt
+
+  nickname:
+      type: text
+      mappings:
+        - type: custom
+  title:
+      type: text
+      mappings:
+        - type: custom
+  geo:
+      type: text
+      mappings:
+        - type: custom
+  health:
+      type: text
+      mappings:
+        - type: custom
+  home_longitude:
+      type: text
+      mappings:
+        - type: custom
+  home_latitude:
+      type: text
+      mappings:
+        - type: custom
+  birthday:
+      type: text
+      mappings:
+        - type: custom
+  sex:
+      type: text
+      mappings:
+        - type: custom
+  medical_preconditions:
+      type: text
+      mappings:
+        - type: custom
+  change_date:
+        type: text
+        mappings:
+            - type: from_entity
+              entity: date
+              intent: blood_pressure_trend_changed_since_date
+            - type: custom
 
 actions:
-    - utter_greet
-    - utter_goodbye
-    - utter_ask_user_id
-    - action_get_basic_user_details
+  - utter_greet
+  - utter_goodbye
+  - utter_ask_user_id
+  - action_get_most_recent_blood_pressure
+  - action_get_basic_user_details
+  - action_get_user_nickname
+  - action_get_blood_pressure_trends_three_months
+  - action_check_high_systolic_readings
+  - action_check_blood_pressure_time_of_day
+  - action_alert_critical_blood_pressure
+  - action_get_location_specific_blood_pressure
+  - action_compare_blood_pressure_home_vs_other
+  - action_get_user_medical_preconditions
+  - action_blood_pressure_trend_changed_since_date
+  - action_high_bloodpressure_readings
+

@@ -1,12 +1,13 @@
-import json
+from datetime import datetime
 from typing import Any, Text, Dict, List, Tuple, Optional
 
-import psycopg2
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
-from openai import OpenAI
 
-from openai import AssistantEventHandler
+from actions.db_utils import DBHandler, get_blood_pressure_spans
+from actions.gpt_utils import GPTHandler
+
+from rasa_sdk.events import SlotSet
 
 
 class ActionAskGPT(Action):
@@ -30,17 +31,19 @@ class ActionGetBasicUserDetails(Action):
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         user_id = tracker.get_slot("user_id")
-        if user_id is None:
+        print(user_id)
+        if user_id is None or user_id == "-1":
             dispatcher.utter_message("Please provide a user id.")
             return []
         details, response = ActionGetBasicUserDetails.get_patient_details(user_id)
+        slot_events = [SlotSet(key, value) for key, value in details.items() if value is not None]
         print(details)
         if details is None:
             dispatcher.utter_message("No user found with the provided user id.")
             print(response)
-            return []
+            return slot_events
         dispatcher.utter_message(f"User {user_id} has the following details: {response}")
-        return []
+        return slot_events
 
     @staticmethod
     def get_patient_details(user_id) -> Tuple[Optional[Dict], str]:
@@ -91,183 +94,508 @@ class ActionGetBasicUserDetails(Action):
             return None, f"An error occurred: {e}"
 
 
-class DBHandler:
-    conn = None
-    cur = None
+class ActionGetUserNickname(Action):
+    def name(self) -> Text:
+        return "action_get_user_nickname"
 
-    def __init__(self):
-        if DBHandler.conn is None:
-            DBHandler.conn = psycopg2.connect(
-                host="localhost",
-                database="insights",
-                user="insights",
-                port="5432", )
-            DBHandler.cur = self.conn.cursor()
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        user_id = tracker.get_slot("user_id")
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+        query = f"""SELECT nickname FROM patient WHERE user_id = {user_id};"""
+        result = DBHandler().execute_query(query)[0]
+        print(result)
+        nickname = result[0] if result else None
+        if nickname is None:
+            dispatcher.utter_message("No user found with the provided user id.")
+            print(nickname)
+            return []
+        dispatcher.utter_message(f"The nickname of user {user_id} is {nickname}.")
+        return []
 
-    def execute_query(self, query) -> str:
-        print("Executing query: ", query)
-        try:
-            self.cur.execute(query)
-            results = self.cur.fetchall()
-        except psycopg2.OperationalError as e:
-            self.conn.rollback()
-            return "Operational error: " + str(e)
-        except psycopg2.ProgrammingError as e:
-            self.conn.rollback()
-            return "Programming error: " + str(e)
-        except psycopg2.IntegrityError as e:
-            self.conn.rollback()
-            return "Integrity error: " + str(e)
-        except psycopg2.DataError as e:
-            self.conn.rollback()
-            return "Data error: " + str(e)
-        except psycopg2.InternalError as e:
-            self.conn.rollback()
-            return "Internal error: " + str(e)
-        except psycopg2.InFailedSqlTransaction as e:
-            self.conn.rollback()
-            return "Transaction failed and was rolled back: " + str(e)
-        return results
 
-    def close(self):
-        self.conn.close()
+class ActionGetBloodPressureTrendsThreeMonths(Action):
 
-    def get_table_schema(self):
-        self.cur.execute(
-            "SELECT * FROM information_schema.columns WHERE table_schema = 'public' AND table_name NOT IN ('databasechangelog', 'jhi_user_authority', 'user_activity', 'jhi_user', 'jhi_user_authority', 'databasechangeloglock', 'jhi_authority') ORDER BY table_schema, table_name, ordinal_position")
-        tables = self.cur.fetchall()
-        tables_dict = []
-        for table in tables:
-            table_dict = {
-                "table_name": table[2],
-                "column_name": table[3],
-                "data_type": table[7],
-                "character_maximum_length": table[8],
-                "is_nullable": table[10]
-            }
-            tables_dict.append(table_dict)
-        tables_new = dict()
-        for column in tables_dict:
-            table_name = column["table_name"]
-            column.pop("table_name")
-            if table_name in tables_new:
-                tables_new[table_name].append(column)
+    def name(self) -> Text:
+        return "action_get_blood_pressure_trends_three_months"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        user_id = tracker.get_slot("user_id")
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+
+        query = f"""
+        SELECT
+            DATE_TRUNC('month', recorded_at) AS month,
+            MAX(systolic) AS max_systolic,
+            MIN(systolic) AS min_systolic,
+            AVG(systolic) AS avg_systolic,
+            MAX(diastolic) AS max_diastolic,
+            MIN(diastolic) AS min_diastolic,
+            AVG(diastolic) AS avg_diastolic,
+            MAX(pulse) AS max_pulse,
+            MIN(pulse) AS min_pulse,
+            AVG(pulse) AS avg_pulse
+        FROM bloodpressure
+        WHERE user_id = {user_id} AND recorded_at >= NOW() - INTERVAL '3 MONTHS'
+        GROUP BY month
+        ORDER BY month;
+        """
+        results = DBHandler().execute_query(query)
+        if not results:
+            dispatcher.utter_message(
+                "No blood pressure records found for the past three months for the provided user id.")
+            return []
+        # if birthday is available in slots or db calculate age and therefore recommende bloodpressure spans
+        # if not available recommend general spans
+        response = "Blood pressure trends for the past three months:\n"
+        for record in results:
+            month, max_systolic, min_systolic, avg_systolic, max_diastolic, min_diastolic, avg_diastolic, max_pulse, min_pulse, avg_pulse = record
+            response += (f"Month: {month.strftime('%B %Y')}\n"
+                         f"Max Systolic: {max_systolic}, Min Systolic: {min_systolic}, Avg Systolic: {avg_systolic:.2f}\n"
+                         f"Max Diastolic: {max_diastolic}, Min Diastolic: {min_diastolic}, Avg Diastolic: {avg_diastolic:.2f}\n"
+                         f"Max Pulse: {max_pulse}, Min Pulse: {min_pulse}, Avg Pulse: {avg_pulse:.2f}\n\n")
+
+        systolic_span, diastolic_span = get_blood_pressure_spans(tracker, user_id)
+
+        response += (f"Recommended blood pressure spans for patients in this age group:\n"
+                     f"Systolic: {systolic_span[0]} - {systolic_span[1]}\n"
+                     f"Diastolic: {diastolic_span[0]} - {diastolic_span[1]}\n")
+
+        dispatcher.utter_message(response)
+        return []
+
+
+class ActionHighBloodPressureReadings(Action):
+    def name(self) -> Text:
+        return "action_high_bloodpressure_readings"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        user_id = tracker.get_slot("user_id")
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+
+        # Retrieve the type, direction, and limit from the entities
+        bp_type = tracker.get_latest_entity_values("type")
+        direction = tracker.get_latest_entity_values("direction")
+        limit = tracker.get_latest_entity_values("limit")
+        # Define the SQL query
+        if "low" in direction:
+            operator = "<"
+        elif "high" in direction:
+            operator = ">"
+        else:
+            dispatcher.utter_message("Invalid direction. Please provide either 'higher' or 'lower'.")
+            return []
+
+        if bp_type == "pulse":
+            limit = int(limit) if limit else 110
+        else:
+            limit = int(limit) if limit and limit != 0 \
+                else get_blood_pressure_spans(tracker, user_id)[0 if bp_type == "systolic" else 1][
+                0 if operator == "<" else 1]
+
+        query = f"""
+        SELECT recorded_at, {bp_type}
+        FROM bloodpressure
+        WHERE user_id = {user_id} AND {bp_type} {operator} {limit} AND recorded_at >= NOW() - INTERVAL '1 MONTH'
+        ORDER BY recorded_at DESC;
+        """
+
+        # Execute the query
+        results = DBHandler().execute_query(query)
+        if not results:
+            dispatcher.utter_message(
+                f"No {bp_type} readings {direction} than {limit} mmHg in the past month for the provided user id.")
+            return []
+
+        # Format the response
+        response = f"There are {len(results)} {bp_type.capitalize()} blood pressure readings {direction} than {limit} mmHg in the past month:\n"
+        for record in results:
+            recorded_at, bp_reading = record
+            response += f"{recorded_at.strftime('%Y-%m-%d %H:%M:%S')}: {bp_reading} mmHg\n"
+
+        dispatcher.utter_message(response)
+        return []
+
+
+class ActionBloodPressureGeofenceCorrelation(Action):
+    def name(self) -> Text:
+        return "action_blood_pressure_geofence_correlation"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        user_id = tracker.get_slot("user_id")
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+
+        # Define the SQL query to get blood pressure readings and geofence status
+        query = f"""
+        SELECT recorded_at, systolic, diastolic, geofence_status
+        FROM bloodpressure
+        WHERE user_id = {user_id} AND recorded_at >= NOW() - INTERVAL '3 MONTH'
+        ORDER BY recorded_at DESC;
+        """
+
+        # Execute the query
+        results = DBHandler().execute_query(query)
+        if not results:
+            dispatcher.utter_message("No blood pressure readings in the past month for the provided user id.")
+            return []
+
+        def calculate_average(readings):
+            total_systolic = sum(reading[1] for reading in readings)
+            total_diastolic = sum(reading[2] for reading in readings)
+            count = len(readings)
+            return (total_systolic / count, total_diastolic / count) if count else (0, 0)
+
+        # Process the results to determine the correlation
+        inside_geofence_readings = []
+        outside_geofence_readings = []
+        just_left_geofence_readings = []
+        still_just_left_geofence_readings = []
+        returned_to_geofence_readings = []
+
+        for record in results:
+            recorded_at, systolic, diastolic, geofence_status = record
+            if geofence_status == 'IN_GEOFENCE':
+                inside_geofence_readings.append((recorded_at, systolic, diastolic))
+            elif geofence_status == 'OUTSIDE_GEOFENCE':
+                outside_geofence_readings.append((recorded_at, systolic, diastolic))
+            elif geofence_status == 'JUST_LEFT_GEOFENCE' or geofence_status == 'STILL_JUST_LEFT_GEOFENCE':
+                still_just_left_geofence_readings.append((recorded_at, systolic, diastolic))
+            elif geofence_status == 'RETURNED_TO_GEOFENCE':
+                returned_to_geofence_readings.append((recorded_at, systolic, diastolic))
+
+        # Check if we have enough data for all statuses
+        if not inside_geofence_readings or not outside_geofence_readings or not just_left_geofence_readings or not still_just_left_geofence_readings or not returned_to_geofence_readings:
+            dispatcher.utter_message(
+                "Insufficient data to determine a correlation between blood pressure and geofence status.")
+            return []
+
+        # Calculate average readings for each geofence status
+        avg_inside = calculate_average(inside_geofence_readings)
+        avg_outside = calculate_average(outside_geofence_readings)
+        avg_just_left = calculate_average(just_left_geofence_readings)
+        avg_still_just_left = calculate_average(still_just_left_geofence_readings)
+        avg_returned = calculate_average(returned_to_geofence_readings)
+
+        # Format the response
+        response = (f"Correlation between blood pressure and geofence status in the past month:\n"
+                    f"Inside Geofence: Average Systolic = {avg_inside[0]:.2f} mmHg, Average Diastolic = {avg_inside[1]:.2f} mmHg\n"
+                    f"Outside Geofence: Average Systolic = {avg_outside[0]:.2f} mmHg, Average Diastolic = {avg_outside[1]:.2f} mmHg\n"
+                    f"Just Left Geofence: Average Systolic = {avg_just_left[0]:.2f} mmHg, Average Diastolic = {avg_just_left[1]:.2f} mmHg\n"
+                    f"Returned to Geofence: Average Systolic = {avg_returned[0]:.2f} mmHg, Average Diastolic = {avg_returned[1]:.2f} mmHg\n"
+                    f"Number of readings inside geofence: {len(inside_geofence_readings)}, "
+                    f"Number of readings outside geofence: {len(outside_geofence_readings)}, "
+                    f"Number of readings just left geofence: {len(just_left_geofence_readings)}, "
+                    f"Number of readings still just left geofence: {len(still_just_left_geofence_readings)}, "
+                    f"Number of readings returned to geofence: {len(returned_to_geofence_readings)}")
+        dispatcher.utter_message(response)
+        return []
+
+
+class ActionBloodPressureTimeOfDay(Action):
+    def name(self) -> Text:
+        return "action_blood_pressure_time_of_day"
+
+    def run(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        user_id = tracker.get_slot("user_id")
+
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+
+        results = get_bloodpressure(user_id)
+
+        if not results:
+            dispatcher.utter_message("No blood pressure readings found for the provided user id.")
+            return []
+
+        time_of_day_readings = {'morning': [], 'afternoon': [], 'evening': [], 'night': []}
+        for record in results:
+            recorded_at, systolic, diastolic, pulse = record
+            hour = datetime.strptime(recorded_at, '%Y-%m-%d %H:%M:%S.%f').hour
+            if 6 <= hour < 12:
+                time_of_day_readings['morning'].append((systolic, diastolic))
+            elif 12 <= hour < 18:
+                time_of_day_readings['afternoon'].append((systolic, diastolic))
+            elif 18 <= hour < 24:
+                time_of_day_readings['evening'].append((systolic, diastolic))
             else:
-                tables_new[table_name] = [column]
-        return tables_new
+                time_of_day_readings['night'].append((systolic, diastolic))
 
-    @staticmethod
-    # Function to generate Markdown formatted text from the schema dictionary
-    def generate_markdown(schema):
-        markdown_output = "# Database Schema\n\n"
-        for table_name, columns in schema.items():
-            markdown_output += f"## Table: {table_name}\n\n"
-            for column in columns:
-                nullable = "not nullable" if column["is_nullable"] == "NO" else "nullable"
-                details = f"{column['data_type']}"
-                if "character_maximum_length" in column:
-                    details += f", max length: {column['character_maximum_length']}"
-                markdown_output += f"- **{column['column_name']}** ({details}, {nullable}): Description.\n"
-            markdown_output += "\n"
-        return markdown_output
+        response = "Statistics about blood pressure readings by time of day:\n"
+        for time_of_day, readings in time_of_day_readings.items():
+            if readings:
+                avg_systolic = sum(r[0] for r in readings) / len(readings)
+                avg_diastolic = sum(r[1] for r in readings) / len(readings)
+                max_systolic = max(r[0] for r in readings)
+                min_systolic = min(r[0] for r in readings)
+                max_diastolic = max(r[1] for r in readings)
+                min_diastolic = min(r[1] for r in readings)
+                response += (
+                    f"{time_of_day.capitalize()}: Systolic - Avg: {avg_systolic:.2f}, Max: {max_systolic}, Min: {min_systolic}, N: {len(readings)}; "
+                    f"Diastolic - Avg: {avg_diastolic:.2f}, Max: {max_diastolic}, Min: {min_diastolic}, N: {len(readings)};\n")
 
+        # attach reasonable spans for this user
+        systolic_span, diastolic_span = get_blood_pressure_spans(tracker, user_id)
+        response += (f"Normal blood pressure spans for this user:\n"
+                     f"Systolic: {systolic_span[0]} - {systolic_span[1]}\n"
+                     f"Diastolic: {diastolic_span[0]} - {diastolic_span[1]}\n")
 
-class GPTHandler:
-
-    def __init__(self):
-        self.db_handler = DBHandler()
-        db_schema = DBHandler.generate_markdown(self.db_handler.get_table_schema())
-        self.client = OpenAI(api_key="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")
-        self.thread = None
-        self.assistant = self.client.beta.assistants.create(
-            name="PostgresSQL Data Extractor",
-            instructions=f"""
-You are an assistant that is able to extract data from a database. Therefore you have the tool of accessing a sql postgresql database. Your task is to answer the question of the user by querying the database. The database schema is provided below.
-You can use the tool 'execute_sql_statement' to ask sql requests to the database. The tool has one parameter 'query' which is the sql query to be executed.
-the user of interest in this case is has the user_id 5504.
-You are in the role of a junior doctor, that provides insights to a senior doctor that asks them questions about the patients.
-Provide answers in professional medical langugage being precise and short, as the doctor hsa not much time. 
-Everytime you run into problems, please just try your best and different approaches to solve the problem, get different views on the data and use sql functions to write stuff.
-# Database Schema
-
-""" + db_schema,
-            model="gpt-3.5-turbo",
-            tools=[
-                {"type": "function",
-                 "function": {
-                     "name": "execute_sql_statement",
-                     "description": "Use this tool to ask sql requests to the database.",
-                     "parameters": {
-                         "type": "object",
-                         "properties": {
-                             "query": {
-                                 "type": "string",
-                                 "description": "The sql query to be executed"
-                             }
-                         },
-                         "required": ["query"]
-                     }
-                 }
-                 }
-            ]
-        )
-
-        def ask_question(question: str, gui=None):
-            thread = self.thread or self.client.beta.threads.create()
-            self.client.beta.threads.messages.create(
-                thread_id=thread.id,
-                role="user",
-                content=question,
-            )
-            with self.client.beta.threads.runs.stream(
-                    thread_id=thread.id,
-                    assistant_id=self.assistant.id,
-                    event_handler=EventHandler(gui=gui, gpt_handler=self)
-            ) as stream:
-                for text in stream.text_deltas:
-                    if gui:
-                        gui.add_text(text)
-                    else:
-                        print(text, end="", flush=True)
-                stream.until_done()
-            return thread
+        dispatcher.utter_message(response)
+        return []
 
 
-class EventHandler(AssistantEventHandler):
+def is_critical(systolic, diastolic, pulse, systolic_span, diastolic_span, pulse_span=(60, 160)):
+    if systolic > systolic_span[1] or systolic < systolic_span[0]:
+        return True
+    if diastolic > diastolic_span[1] or diastolic < diastolic_span[0]:
+        return True
+    if pulse > pulse_span[1] or pulse < pulse_span[0]:
+        return True
+    return False
 
-    def __init__(self, gui=None, gpt_handlers=None):
-        self.gpt_handler = gpt_handlers if gpt_handlers else GPTHandler()
-        self.gui = gui
-        super().__init__()
 
-    def on_event(self, event):
-        # Retrieve events that are denoted with 'requires_action'
-        # since these will have our tool_calls
-        if event.event == 'thread.run.requires_action':
-            run_id = event.data.id  # Retrieve the run ID from the event data
-            self.handle_requires_action(event.data, run_id)
+class ActionCriticalBloodPressureAlerts(Action):
+    def name(self) -> Text:
+        return "action_critical_blood_pressure_alerts"
 
-    def handle_requires_action(self, data, run_id):
-        tool_outputs = []
+    def run(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
 
-        for tool in data.required_action.submit_tool_outputs.tool_calls:
-            if tool.function.name == "execute_sql_statement":
-                result = DBHandler().execute_query(json.loads(tool.function.arguments)["query"])
-                tool_outputs.append({"tool_call_id": tool.id, "output": result})
+        user_id = tracker.get_slot("user_id")
 
-        # Submit all tool_outputs at the same time
-        self.submit_tool_outputs(tool_outputs, run_id)
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
 
-    def submit_tool_outputs(self, tool_outputs, run_id):
-        # Use the submit_tool_outputs_stream helper
-        with self.gpt_handler.client.beta.threads.runs.submit_tool_outputs_stream(
-                thread_id=self.current_run.thread_id,
-                run_id=self.current_run.id,
-                tool_outputs=tool_outputs,
-                event_handler=EventHandler(),
-        ) as stream:
-            for text in stream.text_deltas:
-                if self.gui:
-                    self.gui.add_text(text)
-                else:
-                    print(text, end="", flush=True)
+        results = get_bloodpressure(user_id, 1200)
+        if not results:
+            dispatcher.utter_message("No blood pressure readings found for the provided user id.")
+            return []
+
+        critical_readings = []
+        systolic_span, diastolic_span = get_blood_pressure_spans(tracker, user_id)
+        for record in results:
+            recorded_at, systolic, diastolic, pulse = record
+            if is_critical(systolic, diastolic, pulse, systolic_span, diastolic_span):
+                critical_readings.append((recorded_at, systolic, diastolic))
+
+        if not critical_readings:
+            dispatcher.utter_message("No critical blood pressure readings found for the provided user id.")
+            return []
+
+        response = "Critical blood pressure readings:\n"
+        for reading in critical_readings:
+            recorded_at, systolic, diastolic, pulse = reading
+            in_geofence = check_most_recent_geofence(recorded_at, user_id)
+            response += f"Recorded at: {recorded_at}, Systolic: {systolic} mmHg, Diastolic: {diastolic} mmHg, Pulse: {pulse}, In Geofence: {in_geofence}\n"
+
+        dispatcher.utter_message(response)
+        return []
+
+
+def get_bloodpressure(user_id, limit=100) -> List:
+    query = f"""
+    SELECT recorded_at, systolic, diastolic, pulse
+    FROM bloodpressure
+    WHERE user_id = {user_id}
+    ORDER BY recorded_at DESC
+    LIMIT {limit};
+    """
+    results = DBHandler().execute_query(query)
+    return results
+
+
+def check_most_recent_geofence(timestamp, user_id):
+    query = f"""
+    SELECT geofence_detailed_status
+    FROM geo_location
+    WHERE user_id = {user_id} AND acquired_at <= timestamp
+    ORDER BY acquired_at DESC
+    LIMIT 1;
+    """
+    result = DBHandler().execute_query(query)
+    return result[0] if result else "Unknown"
+
+
+class ActionGetLocationSpecificBloodPressure(Action):
+    def name(self) -> Text:
+        return "action_get_location_specific_blood_pressure"
+
+    def run(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        user_id = tracker.get_slot("user_id")
+
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+        results = get_bloodpressure(user_id, 1000)
+        if not results:
+            dispatcher.utter_message("No blood pressure readings found for the provided user id outside the geofence.")
+            return []
+
+        # a) for each reading classify if outside according to check_most_recent_geofence
+        # b) calculate most recent and average, min and max systolic, diastolic as well as pulse
+        valid_geostati = {
+            "inside": ['IN_GEOFENCE', 'RETURNED_TO_GEOFENCE'],
+            "outside": ['OUTSIDE_GEOFENCE', 'JUST_LEFT_GEOFENCE', 'STILL_JUST_LEFT_GEOFENCE']
+        }
+
+        location = next(tracker.get_latest_entity_values('location'))
+
+        for record in results:
+            recorded_at, systolic, diastolic, pulse = record
+            geofence_status = check_most_recent_geofence(recorded_at, user_id)
+            if geofence_status not in valid_geostati[location]:
+                results.remove(record)
+
+        if not results:
+            dispatcher.utter_message("No blood pressure readings found for the provided user id outside the geofence.")
+            return []
+
+        response = "Blood pressure readings outside the geofence:\n"
+        most_recent = results[0]
+        avg_systolic = sum(r[1] for r in results) / len(results)
+        avg_diastolic = sum(r[2] for r in results) / len(results)
+        avg_pulse = sum(r[3] for r in results) / len(results)
+        max_systolic = max(r[1] for r in results)
+        min_systolic = min(r[1] for r in results)
+        max_diastolic = max(r[2] for r in results)
+        min_diastolic = min(r[2] for r in results)
+        max_pulse = max(r[3] for r in results)
+        min_pulse = min(r[3] for r in results)
+
+        response += f"Most recent reading outside geofence: Recorded {get_days_ago(most_recent[0])} days ago, Systolic: {most_recent[1]} mmHg, Diastolic: {most_recent[2]} mmHg, Pulse: {most_recent[3]}\n"
+        response += (f"Min, Average and Max Values for outside:\n"
+                     f"Systolic: {min_systolic}, {avg_systolic:.2f}, {max_systolic}\n"
+                     f"Diastolic: {min_diastolic}, {avg_diastolic:.2f}, {max_diastolic}\n"
+                     f"Pulse: {min_pulse}, {avg_pulse:.2f}, {max_pulse}\n")
+
+        corridor = get_blood_pressure_spans(tracker, user_id)
+
+        response += (f"Recommended blood pressure spans for patients in this age group:\n"
+                     f"Systolic: {corridor[0][0]} - {corridor[0][1]}\n"
+                     f"Diastolic: {corridor[1][0]} - {corridor[1][1]}\n")
+
+        dispatcher.utter_message(response)
+        return []
+
+
+class ActionGetLocationSpecificBloodPressureInside(ActionGetLocationSpecificBloodPressure):
+    valid_geo_status_list = ['IN_GEOFENCE', 'RETURNED_TO_GEOFENCE']
+
+    def name(self) -> Text:
+        return "action_get_location_specific_blood_pressure_inside"
+
+
+class ActionGetLocationSpecificBloodPressureOutside(ActionGetLocationSpecificBloodPressure, Action):
+    valid_geo_status_list = ['OUTSIDE_GEOFENCE', 'JUST_LEFT_GEOFENCE', 'STILL_JUST_LEFT_GEOFENCE']
+
+    def name(self) -> Text:
+        return "action_get_location_specific_blood_pressure_outside"
+
+
+def get_days_ago(date):
+    if date is None:
+        return None
+    if isinstance(date, str):
+        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
+    return (datetime.now() - date).days
+
+class ActionBloodPressureHomeVsOther(Action):
+    def name(self) -> Text:
+        return "action_blood_pressure_home_vs_other"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        # TODO: Implement the action
+        dispatcher.utter_message("This is a dummy action for the intent 'blood_pressure_home_vs_other'.")
+        return []
+
+class ActionUserMedicalPreconditions(Action):
+    def name(self) -> Text:
+        return "action_user_medical_preconditions"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        # TODO: Implement the action
+        dispatcher.utter_message("This is a dummy action for the intent 'user_medical_preconditions'.")
+        return []
+
+class ActionBloodPressureChangedSinceDate(Action):
+    def name(self) -> Text:
+        return "action_blood_pressure_changed_since_date"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        # TODO: Implement the action
+        dispatcher.utter_message("This is a dummy action for the intent 'blood_pressure_changed_since_date'.")
+        return []
+
+
+class ActionRecentBloodPressureReadings(Action):
+    def name(self) -> Text:
+        return "action_get_most_recent_blood_pressure"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        user_id = tracker.get_slot("user_id")
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+        result = get_bloodpressure(user_id, 1)
+        if not result:
+            dispatcher.utter_message("No blood pressure readings found for the provided user id.")
+            return []
+        print(result)
+        recorded_at, systolic, diastolic, pulse = result[0]
+
+        response = (f"Most recent reading was recorded {get_days_ago(recorded_at)} days ago, Systolic: {systolic} mmHg, Diastolic: {diastolic} mmHg, Pulse: {pulse}\n")
+
+        dispatcher.utter_message(response)
+        return []
+
+
+class ActionTrendChangesSinceDate(Action):
+    def name(self) -> Text:
+        return "action_blood_pressure_trend_changed_since_date"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        pass

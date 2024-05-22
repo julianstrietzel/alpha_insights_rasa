@@ -27,6 +27,7 @@ nlu:
     - user id: [1900413](user_id)
     - user id: [10](user_id)
     - patient id: [20078](user_id)
+    - [1900413](user_id)
     
   
 
@@ -46,37 +47,41 @@ nlu:
 
 - intent: blood_pressure_last_recorded
   examples: |
+    - last blood pressure reading
+    - blood pressure reading
+    - most recent blood pressure
+    - blood pressure
+    - bloodpressure
     - When was my last blood pressure reading taken?
-    - What is the date of my last blood pressure check?
-    - Can you tell me the last time I had my blood pressure checked?
+    - What is my last blood pressure check?
+    - Can you tell me the last blood pressure measurement?
     - When did I last measure my blood pressure?
-    - What's the timestamp of my latest blood pressure reading?
+    - What's the latest blood pressure measurement?
 
 
 - intent: user_nickname
   examples: |
-    - What is the nickname of user ID [1900413](user_id)?
-    - Can you tell me the nickname of user [10](user_id)?
-    - What's the nickname for user [20078](user_id)?
-    - Show me the nickname of user [10435](user_id)?
-    - What nickname does user ID [76](user_id) have?
+    - name
+    - called how?
+    - name of the patient
+    - how is the patient called
     - What is the nickname of the patient?
     - Can you tell me the nickname of the patient?
-    - What's the nickname for the patient?
+    - What's the name of the patient?
     - Show me the nickname of the patient?
     - What name does the patient have?
     - What is the name of the patient?
     - Can you tell me the name of the patient?
     - What's the name of the user?
-    - Show me the name of the user?
 
 - intent: basic_user_details
   examples: |
-    - What are the basic details of user ID [1900413](user_id)?
-    - Can you tell me the basic details of user [10](user_id)?
-    - What's the basic information for user [20078](user_id)?
-    - Show me the basic details of user [10435](user_id)?
-    - What basic information does user ID [76](user_id) have?
+    - user details
+    - basic information
+    - patient details
+    - details
+    - basic info
+    - information
     - What is the basic information of the patient?
     - Can you tell me the basic information of the patient?
     - What's the basic information for the patient?
@@ -84,12 +89,188 @@ nlu:
     - What basic information does the patient have?
     - What is the basic information of the user?
     - Can you tell me the basic information of the user?
-    - What's the basic information for the user?
-    - Show me the basic information of the user?
-    - What basic information does the user have?
-    - What is the basic information of the patient?
-    - Can you tell me the basic information of the patient?
-    - What's the basic information for the patient?
-    - Show me the basic information of the patient?
-    - What basic information does the patient have?
-    - What is the basic information of the user?
+
+
+
+## new
+- intent: blood_pressure_trends_three_months
+  examples: |
+    - Trends in the blood pressure
+    - changes in blood pressure
+    - blood pressure trends
+    - What is the average systolic and diastolic blood pressure of the user over the past months?
+    - Can you show me the user's blood pressure trends?
+    - What are the blood pressure trends for the user in the last 90 days?
+    - How has the user's blood pressure changed in the past month?
+    - Show me the user's average blood pressure over the last month.
+    - What's the user's average systolic and diastolic pressure for the past month?
+    - Provide the blood pressure trends for the user over the last 90 days.
+    - Display the user's blood pressure trends for the past three months.
+    - How did the user's blood pressure trend in the past months?
+    - Can I see the user's blood pressure trends over the last three months?
+
+- intent: high_bloodpressure_readings
+  examples: |
+    - Any high blood pressure readings?
+    - Extreme blood pressure
+    - Special blood pressure readings
+    - Anything special about the blood pressure?
+    - Unusual blood pressure readings
+    - Has the user had any readings of [systolic](type) blood pressure [higher](direction) than [130](limit) mmHg in the last month?
+    - Did the user have any high [systolic](type) blood pressure readings recently?
+    - Show me if the user's [systolic](type) pressure exceeded [130](limit) mmHg in the last months.
+    - Were there any instances of high [systolic](type) blood pressure for the user the last weeks?
+    - Has the user recorded any [systolic](type) blood pressure above [130](limit) mmHg in the past weeks?
+    - Did the user have [diastolic](type) readings over [130](limit) mmHg recently?
+    - Were there [high](direction) [systolic](type) blood pressure readings in the last week for the user?
+    - Has the user's [systolic](type) pressure been [lower](direction) than [90](limit) mmHg in the past week?
+    - Any [diastolic](type) blood pressure readings below [80](limit) for the user this week?
+
+- synonym: systolic
+  examples: |
+    - Systolic
+    - Sistolic
+    - Systolic pressure
+    - sys
+
+- synonym: diastolic
+  examples: |
+    - Diastolic
+    - Diastolic pressure
+    - Diastol
+    - dia
+- synonym: higher
+  examples: |
+    - higher
+    - above
+    - over
+    - more than
+- synonym: lower
+  examples: |
+    - lower
+    - below
+    - under
+    - less than
+
+- intent: blood_pressure_time_of_day
+  examples: |
+    - when is the blood pressure the highest?
+    - blood pressure in the morning and evening
+    - Are there specific times of day when the user's blood pressure tends to be higher?
+    - When is the user's blood pressure typically higher?
+    - Show the user's blood pressure variations by time of day.
+    - Is the blood pressure for the user higher in the morning?
+    - Are there certain times of day with higher blood pressure readings for the user?
+    - How does the user's blood pressure vary throughout the day?
+    - What times of day does the user's blood pressure increase?
+    - Show me the user's blood pressure trends by time of day.
+    - Does the user's blood pressure change at different times of the day?
+    - Are there higher blood pressure readings for the user at specific times?
+    - What times of day show higher blood pressure for the user?
+
+- intent: critical_blood_pressure_alerts
+  examples: |
+    - critical blood pressure readings
+    - any extreme blood pressure values?
+    - highest blood pressure readings?
+    - Has the user had any critical blood pressure readings recently, and where were they at the time?
+    - Did the user have any critical blood pressure incidents recently?
+    - Was there any critical blood pressure events for the user lately?
+    - Show me if the user had critical blood pressure readings and their locations.
+    - Were there any critical blood pressure events for the user lately?
+    - Has the user recorded any critical blood pressure readings recently?
+    - Where was the user during critical blood pressure readings?
+    - Any recent critical blood pressure readings for the user and locations?
+    - Were there critical blood pressure readings for the user and where?
+    - Where was the user when they had critical blood pressure readings?
+
+- intent: location_specific_blood_pressure_outside # merge with inside accordingly in others
+  examples: |
+    - blood pressure [at home](location)
+    - blood pressure [outside](location)
+    - blood pressure [within the geofence](location)
+    - When was the last time the user recorded their blood pressure [outside](location) the geofence, and what were the readings?
+    - Show me the user's blood pressure readings when they were [outside](location) the geofence.
+    - What were the user's blood pressure readings [outside](location) the geofence?
+    - When did the user last record blood pressure [outside](location) the geofence?
+    - What were the user's blood pressure readings [inside](location) the geofence?
+    - When did the user last record blood pressure [inside](location) the geofence?
+    - Provide the user's blood pressure readings [inside](location) the geofence.
+    - What was the user's blood pressure the last time they were [inside](location) the geofence?
+    - Show the user's blood pressure readings for [inside](location) geofence locations.
+    - When was the user's last blood pressure reading [inside](location) the geofence?
+    - What were the user's blood pressure levels [inside](location) the geofence?
+    - When did the user last have blood pressure readings [inside](location) the geofence?
+
+- synonym: inside
+  examples: |
+    - inside
+    - indoors
+    - within
+    - at home
+    - home
+    - within the geofence
+    - in the geofence 
+
+- synonym: outside
+  examples: |
+    - outside
+    - outdoors
+    - beyond
+    - not at home
+    - not home
+    - outside the geofence
+    - not in the geofence
+
+
+- intent: blood_pressure_home_vs_other
+  examples: |
+    - What are the user's blood pressure readings when they are at home compared to other locations?
+    - Show the user's blood pressure at home versus other places.
+    - How does the user's blood pressure compare at home and elsewhere?
+    - What is the user's blood pressure at home versus other locations?
+    - Compare the user's blood pressure at home and other places.
+    - What are the blood pressure readings for the user at home compared to other locations?
+    - Show me the user's blood pressure at home versus other locations.
+    - How does the user's blood pressure vary at home and other places?
+    - What is the user's blood pressure at home compared to elsewhere?
+    - Provide the user's blood pressure readings at home and other locations.
+
+- intent: user_medical_preconditions
+  examples: |
+    - preconditions
+    - health conditions
+    - medical conditions
+    - medical background knowledge
+    - Does the user have any medical preconditions that could affect their blood pressure readings?
+    - What medical preconditions does the user have that might impact blood pressure?
+    - Show me the user's medical preconditions related to blood pressure.
+    - Are there any medical conditions the user has affecting their blood pressure?
+    - What are the user's pre-existing conditions that affect blood pressure?
+    - Does the user have conditions that influence blood pressure readings?
+    - What medical preconditions of the user could impact their blood pressure?
+    - Are there any health conditions the user has related to blood pressure?
+    - Show the user's medical preconditions affecting blood pressure.
+    - What are the user's health conditions that impact blood pressure readings?
+
+- intent: blood_pressure_trend_changed_since_date
+  examples: |
+    - Has the user's blood pressure changed since [December 12th](date)?
+    - Show me if the user's blood pressure has changed since [01.12.2023](date).
+    - How has the user's blood pressure changed since [January 1st](date)?
+    - Are there differences in the user's blood pressure since [2024](date)?
+    - What changes have occurred in the user's blood pressure since [January 1st](date)?
+    - Has the user's blood pressure varied since [February 2nd](date)?
+    - Show me the user's blood pressure changes since [03/10/2024](date).
+    - How does the user's blood pressure differ since [2024-12-01](date)?
+    - Are there any changes in the user's blood pressure since [2023-02-13](date)?
+    - What is the user's blood pressure like since [2023-12-24](date)?
+
+- intent: ask_gpt
+  examples: |
+    - More details on this please.
+    - I don't understand.
+    - Can you elaborate?
+    - What?
+    - I need more information.
+
