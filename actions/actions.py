@@ -52,12 +52,13 @@ class ActionGetBasicUserDetails(Action):
             query = f"""SELECT id, health, geo, user_id, nickname, title, home_longitude, home_latitude, birthday, sex, 
             medical_preconditions FROM patient WHERE user_id = {user_id};"""
 
-            result = DBHandler().execute_query(query)[0]
+            result = DBHandler().execute_query(query)
             # log result
             print(result)
             # log result datatype
             print(type(result))
             if result:
+                result = result[0]
                 patient_details = {
                     "health": result[1],
                     "geo": result[2],
@@ -104,9 +105,8 @@ class ActionGetUserNickname(Action):
             dispatcher.utter_message("Please provide a user id.")
             return []
         query = f"""SELECT nickname FROM patient WHERE user_id = {user_id};"""
-        result = DBHandler().execute_query(query)[0]
-        print(result)
-        nickname = result[0] if result else None
+        result = DBHandler().execute_query(query)
+        nickname = result[0][0] if result else None
         if nickname is None:
             dispatcher.utter_message("No user found with the provided user id.")
             print(nickname)
@@ -300,7 +300,7 @@ class ActionBloodPressureGeofenceCorrelation(Action):
 
 class ActionBloodPressureTimeOfDay(Action):
     def name(self) -> Text:
-        return "action_blood_pressure_time_of_day"
+        return "action_check_blood_pressure_time_of_day"
 
     def run(
             self,
@@ -426,7 +426,7 @@ def check_most_recent_geofence(timestamp, user_id):
     query = f"""
     SELECT geofence_detailed_status
     FROM geo_location
-    WHERE user_id = {user_id} AND acquired_at <= timestamp
+    WHERE user_id = {user_id} AND acquired_at <= {timestamp}
     ORDER BY acquired_at DESC
     LIMIT 1;
     """
@@ -502,19 +502,6 @@ class ActionGetLocationSpecificBloodPressure(Action):
         return []
 
 
-class ActionGetLocationSpecificBloodPressureInside(ActionGetLocationSpecificBloodPressure):
-    valid_geo_status_list = ['IN_GEOFENCE', 'RETURNED_TO_GEOFENCE']
-
-    def name(self) -> Text:
-        return "action_get_location_specific_blood_pressure_inside"
-
-
-class ActionGetLocationSpecificBloodPressureOutside(ActionGetLocationSpecificBloodPressure, Action):
-    valid_geo_status_list = ['OUTSIDE_GEOFENCE', 'JUST_LEFT_GEOFENCE', 'STILL_JUST_LEFT_GEOFENCE']
-
-    def name(self) -> Text:
-        return "action_get_location_specific_blood_pressure_outside"
-
 
 def get_days_ago(date):
     if date is None:
@@ -539,7 +526,7 @@ class ActionBloodPressureHomeVsOther(Action):
 
 class ActionUserMedicalPreconditions(Action):
     def name(self) -> Text:
-        return "action_user_medical_preconditions"
+        return "action_get_user_medical_preconditions"
 
     async def run(
         self,
@@ -549,20 +536,6 @@ class ActionUserMedicalPreconditions(Action):
     ) -> List[Dict[Text, Any]]:
         # TODO: Implement the action
         dispatcher.utter_message("This is a dummy action for the intent 'user_medical_preconditions'.")
-        return []
-
-class ActionBloodPressureChangedSinceDate(Action):
-    def name(self) -> Text:
-        return "action_blood_pressure_changed_since_date"
-
-    async def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
-    ) -> List[Dict[Text, Any]]:
-        # TODO: Implement the action
-        dispatcher.utter_message("This is a dummy action for the intent 'blood_pressure_changed_since_date'.")
         return []
 
 
@@ -598,4 +571,20 @@ class ActionTrendChangesSinceDate(Action):
         return "action_blood_pressure_trend_changed_since_date"
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        pass
+        # TODO: Implement the action
+        dispatcher.utter_message("This is a dummy action for the intent 'action_blood_pressure_trend_changed_since_date'.")
+        return []
+
+class ActionRespondToGreeting(Action):
+
+    def name(self) -> Text:
+        return "action_respond_to_greeting"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        # if user_id is set call basic information action otherwise utter provide user_id
+        user_id = tracker.get_slot("user_id")
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+        else:
+            return ActionGetBasicUserDetails().run(dispatcher, tracker, domain)

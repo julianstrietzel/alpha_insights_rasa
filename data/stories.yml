@@ -4,65 +4,10 @@ stories:
 
 - story: greet and intro
   steps:
-  - intent: greet
-  - action: utter_ask_user_id
-  - intent: provide_user_id
-  - action: action_get_basic_user_details
-
-- story: story_goodbye
-  steps:
-  - intent: goodbye
-  - action: utter_goodbye
-
-- story: basic_user_details
-  steps:
-  - intent: basic_user_details
-  - action: action_get_basic_user_details
-
-- story: get_bloodpressure
-  steps:
-  - intent: blood_pressure_last_recorded
-  - action: action_get_most_recent_blood_pressure
-
-- story: get_username
-  steps:
-  - intent: user_nickname
-  - action: action_get_user_nickname
-
-- story: get_blood_pressure_trends
-  steps:
-    - intent: blood_pressure_trends_three_months
-    - action: action_get_blood_pressure_trends_three_months
-
-- story: check_blood_pressure_time_of_day
-  steps:
-    - intent: blood_pressure_time_of_day
-    - action: action_check_blood_pressure_time_of_day
-
-- story: alert_critical_blood_pressure
-  steps:
-    - intent: critical_blood_pressure_alerts
-    - action: action_alert_critical_blood_pressure
-
-- story: get_location_specific_blood_pressure
-  steps:
-    - intent: location_specific_blood_pressure
-    - action: action_get_location_specific_blood_pressure
-
-- story: compare_blood_pressure_home_vs_other
-  steps:
-    - intent: blood_pressure_home_vs_other
-    - action: action_compare_blood_pressure_home_vs_other
-
-- story: get_user_medical_preconditions
-  steps:
-    - intent: user_medical_preconditions
-    - action: action_get_user_medical_preconditions
-      
-- story: blood_pressure_trend_changed_since_date
-  steps:
-    - intent: blood_pressure_trend_changed_since_date
-    - action: action_blood_pressure_trend_changed_since_date
+    - intent: greet
+    - action: utter_ask_user_id
+    - intent: provide_user_id
+    - action: action_get_basic_user_details
 
 - story: story_high_bloodpressure_readings
   steps:

@@ -28,7 +28,22 @@ nlu:
     - user id: [10](user_id)
     - patient id: [20078](user_id)
     - [1900413](user_id)
-    
+    - user id [10](user_id)
+    - user [2](user_id)
+    - [2](user_id)
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot?
+    - are you a human?
+    - am I speaking to a bot?
+    - am I speaking to a human?
+    - bot?
+    - are you a real person?
+    - you're a bot?
+    - you're a human?
+    - human?
+    - can i speak to a real person?
   
 
 - intent: goodbye
@@ -91,8 +106,6 @@ nlu:
     - Can you tell me the basic information of the user?
 
 
-
-## new
 - intent: blood_pressure_trends_three_months
   examples: |
     - Trends in the blood pressure
@@ -184,7 +197,7 @@ nlu:
     - Were there critical blood pressure readings for the user and where?
     - Where was the user when they had critical blood pressure readings?
 
-- intent: location_specific_blood_pressure_outside # merge with inside accordingly in others
+- intent: location_specific_blood_pressure # merge with inside accordingly in others
   examples: |
     - blood pressure [at home](location)
     - blood pressure [outside](location)
@@ -225,6 +238,11 @@ nlu:
 
 - intent: blood_pressure_home_vs_other
   examples: |
+    - blood pressure at home versus elsewhere
+    - blood pressure at home compared to other locations
+    - measurements at home versus other places 
+    - outside compares to insights
+    - compare blood pressure at home and elsewhere
     - What are the user's blood pressure readings when they are at home compared to other locations?
     - Show the user's blood pressure at home versus other places.
     - How does the user's blood pressure compare at home and elsewhere?

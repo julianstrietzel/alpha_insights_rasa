@@ -1,4 +1,71 @@
 version: "3.1"
 
 rules:
+  - rule: If greeted ask for user id if not provided
+    steps:
+      - intent: greet
+      - action: action_respond_to_greeting
+  - rule: story_goodbye
+    steps:
+      - intent: goodbye
+      - action: utter_goodbye
 
+  - rule: Bot challenge
+    steps:
+      - intent: bot_challenge
+      - action: utter_bot_challenge
+
+  - rule: basic_user_details
+    steps:
+      - intent: basic_user_details
+      - action: action_get_basic_user_details
+
+  - rule: user_id_provided
+    steps:
+      - intent: provide_user_id
+      - action: action_get_basic_user_details
+
+  - rule: get_bloodpressure
+    steps:
+      - intent: blood_pressure_last_recorded
+      - action: action_get_most_recent_blood_pressure
+
+  - rule: get_username
+    steps:
+      - intent: user_nickname
+      - action: action_get_user_nickname
+
+  - rule: get_blood_pressure_trends
+    steps:
+      - intent: blood_pressure_trends_three_months
+      - action: action_get_blood_pressure_trends_three_months
+
+  - rule: check_blood_pressure_time_of_day
+    steps:
+      - intent: blood_pressure_time_of_day
+      - action: action_check_blood_pressure_time_of_day
+
+  - rule: critical_blood_pressure_alert
+    steps:
+      - intent: critical_blood_pressure_alerts
+      - action: action_critical_blood_pressure_alerts
+
+  - rule: get_location_specific_blood_pressure
+    steps:
+      - intent: location_specific_blood_pressure
+      - action: action_get_location_specific_blood_pressure
+
+  - rule: compare_blood_pressure_home_vs_other
+    steps:
+      - intent: blood_pressure_home_vs_other
+      - action: action_compare_blood_pressure_home_vs_other
+
+  - rule: get_user_medical_preconditions
+    steps:
+      - intent: user_medical_preconditions
+      - action: action_get_user_medical_preconditions
+
+  - rule: blood_pressure_trend_changed_since_date
+    steps:
+      - intent: blood_pressure_trend_changed_since_date
+      - action: action_blood_pressure_trend_changed_since_date

@@ -53,30 +53,31 @@ class DBHandler:
                 port="5432", )
             DBHandler.cur = self.conn.cursor()
 
-    def execute_query(self, query):
+    def execute_query(self, query) -> [List[Tuple], str]:
         print("Executing query: ", query)
         try:
             self.cur.execute(query)
             results = self.cur.fetchall()
+            return results
         except psycopg2.OperationalError as e:
             self.conn.rollback()
-            return "Operational error: " + str(e)
+            print("Operational error: " + str(e))
         except psycopg2.ProgrammingError as e:
             self.conn.rollback()
-            return "Programming error: " + str(e)
+            print("Programming error: " + str(e))
         except psycopg2.IntegrityError as e:
             self.conn.rollback()
-            return "Integrity error: " + str(e)
+            print("Integrity error: " + str(e))
         except psycopg2.DataError as e:
             self.conn.rollback()
-            return "Data error: " + str(e)
+            print("Data error: " + str(e))
         except psycopg2.InternalError as e:
             self.conn.rollback()
-            return "Internal error: " + str(e)
+            print("Internal error: " + str(e))
         except psycopg2.InFailedSqlTransaction as e:
             self.conn.rollback()
-            return "Transaction failed and was rolled back: " + str(e)
-        return results
+            print("Transaction failed and was rolled back: ", e)
+        return None
 
     def close(self):
         self.conn.close()

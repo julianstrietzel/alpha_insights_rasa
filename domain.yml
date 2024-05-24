@@ -30,6 +30,10 @@ responses:
   utter_goodbye:
     - text: "Bye"
 
+  utter_bot_challenge:
+    - text: "I am a bot, what do you want me to do?"
+
+
   utter_ask_user_id:
     - text: "Please provide the user ID"
     - text: "What is the user ID?"
@@ -46,6 +50,7 @@ entities:
   - direction
   - limit
   - date
+  - location
 
 slots:
   user_id:
@@ -110,13 +115,14 @@ actions:
   - utter_greet
   - utter_goodbye
   - utter_ask_user_id
+  - action_respond_to_greeting
   - action_get_most_recent_blood_pressure
   - action_get_basic_user_details
   - action_get_user_nickname
   - action_get_blood_pressure_trends_three_months
   - action_check_high_systolic_readings
   - action_check_blood_pressure_time_of_day
-  - action_alert_critical_blood_pressure
+  - action_critical_blood_pressure_alerts
   - action_get_location_specific_blood_pressure
   - action_compare_blood_pressure_home_vs_other
   - action_get_user_medical_preconditions
