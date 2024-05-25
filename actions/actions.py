@@ -541,9 +541,36 @@ class ActionUserMedicalPreconditions(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        # TODO: Implement the action
-        dispatcher.utter_message("This is a dummy action for the intent 'user_medical_preconditions'.")
+        user_id = tracker.get_slot("user_id")
+        if user_id is None or user_id == "-1":
+            dispatcher.utter_message("Please provide a user id.")
+            return []
+
+        medical_preconditions, response = ActionUserMedicalPreconditions.get_medical_preconditions(user_id)
+        if medical_preconditions is None:
+            dispatcher.utter_message("No medical preconditions found for the provided user id.")
+            print(response)
+            return []
+
+        dispatcher.utter_message(f"User {user_id} has the following medical preconditions: {medical_preconditions}")
         return []
+
+    @staticmethod
+    def get_medical_preconditions(user_id) -> Tuple[Optional[str], str]:
+        try:
+            query = f"SELECT medical_preconditions FROM patient WHERE user_id = {user_id};"
+            result = DBHandler().execute_query(query)
+            print(result)
+            if result:
+                medical_preconditions = result[0][0]
+                response = medical_preconditions if medical_preconditions else "No medical preconditions found."
+            else:
+                response = "No patient found with the given user ID."
+
+            return medical_preconditions, response
+        except Exception as e:
+            return None, f"An error occurred: {e}"
+
 
 
 class ActionRecentBloodPressureReadings(Action):

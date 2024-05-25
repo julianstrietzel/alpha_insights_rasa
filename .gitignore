@@ -1,3 +1,5 @@
 /.rasa/
 /models/
 /.idea/
+/venv/
+/actions/__pycache__/
