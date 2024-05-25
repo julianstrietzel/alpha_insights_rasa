@@ -36,6 +36,10 @@ class ActionGetBasicUserDetails(Action):
             dispatcher.utter_message("Please provide a user id.")
             return []
         details, response = ActionGetBasicUserDetails.get_patient_details(user_id)
+        if details is None:
+            dispatcher.utter_message("No user found with the provided user id.")
+            print(response)
+            return []
         slot_events = [SlotSet(key, value) for key, value in details.items() if value is not None]
         print(details)
         if details is None:
@@ -127,40 +131,42 @@ class ActionGetBloodPressureTrendsThreeMonths(Action):
             return []
 
         query = f"""
-        SELECT
-            DATE_TRUNC('month', recorded_at) AS month,
-            MAX(systolic) AS max_systolic,
-            MIN(systolic) AS min_systolic,
-            AVG(systolic) AS avg_systolic,
-            MAX(diastolic) AS max_diastolic,
-            MIN(diastolic) AS min_diastolic,
-            AVG(diastolic) AS avg_diastolic,
-            MAX(pulse) AS max_pulse,
-            MIN(pulse) AS min_pulse,
-            AVG(pulse) AS avg_pulse
-        FROM bloodpressure
-        WHERE user_id = {user_id} AND recorded_at >= NOW() - INTERVAL '3 MONTHS'
-        GROUP BY month
-        ORDER BY month;
-        """
+    SELECT
+        DATE_TRUNC('month', CAST(recorded_at AS timestamp)) AS month,
+        MAX(systolic) AS max_systolic,
+        MIN(systolic) AS min_systolic,
+        AVG(systolic) AS avg_systolic,
+        MAX(diastolic) AS max_diastolic,
+        MIN(diastolic) AS min_diastolic,
+        AVG(diastolic) AS avg_diastolic,
+        MAX(pulse) AS max_pulse,
+        MIN(pulse) AS min_pulse,
+        AVG(pulse) AS avg_pulse,
+        COUNT(*) AS measurement_count
+    FROM bloodpressure
+    WHERE user_id = 1900413 AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 MONTHS'
+    GROUP BY month
+    ORDER BY month;
+"""
         results = DBHandler().execute_query(query)
         if not results:
             dispatcher.utter_message(
                 "No blood pressure records found for the past three months for the provided user id.")
             return []
-        # if birthday is available in slots or db calculate age and therefore recommende bloodpressure spans
-        # if not available recommend general spans
+
         response = "Blood pressure trends for the past three months:\n"
         for record in results:
-            month, max_systolic, min_systolic, avg_systolic, max_diastolic, min_diastolic, avg_diastolic, max_pulse, min_pulse, avg_pulse = record
+            month, max_systolic, min_systolic, avg_systolic, max_diastolic, min_diastolic, avg_diastolic, max_pulse, min_pulse, avg_pulse, measurement_count = record
             response += (f"Month: {month.strftime('%B %Y')}\n"
+                         f"Measurements: {measurement_count}\n"
                          f"Max Systolic: {max_systolic}, Min Systolic: {min_systolic}, Avg Systolic: {avg_systolic:.2f}\n"
                          f"Max Diastolic: {max_diastolic}, Min Diastolic: {min_diastolic}, Avg Diastolic: {avg_diastolic:.2f}\n"
                          f"Max Pulse: {max_pulse}, Min Pulse: {min_pulse}, Avg Pulse: {avg_pulse:.2f}\n\n")
 
-        systolic_span, diastolic_span = get_blood_pressure_spans(tracker, user_id)
 
-        response += (f"Recommended blood pressure spans for patients in this age group:\n"
+        systolic_span, diastolic_span, age = get_blood_pressure_spans(tracker, user_id)
+
+        response += (f"Recommended blood pressure spans for patients in this age group ({age}):\n"
                      f"Systolic: {systolic_span[0]} - {systolic_span[1]}\n"
                      f"Diastolic: {diastolic_span[0]} - {diastolic_span[1]}\n")
 
@@ -348,7 +354,7 @@ class ActionBloodPressureTimeOfDay(Action):
                     f"Diastolic - Avg: {avg_diastolic:.2f}, Max: {max_diastolic}, Min: {min_diastolic}, N: {len(readings)};\n")
 
         # attach reasonable spans for this user
-        systolic_span, diastolic_span = get_blood_pressure_spans(tracker, user_id)
+        systolic_span, diastolic_span, age = get_blood_pressure_spans(tracker, user_id)
         response += (f"Normal blood pressure spans for this user:\n"
                      f"Systolic: {systolic_span[0]} - {systolic_span[1]}\n"
                      f"Diastolic: {diastolic_span[0]} - {diastolic_span[1]}\n")
@@ -390,7 +396,7 @@ class ActionCriticalBloodPressureAlerts(Action):
             return []
 
         critical_readings = []
-        systolic_span, diastolic_span = get_blood_pressure_spans(tracker, user_id)
+        systolic_span, diastolic_span, age = get_blood_pressure_spans(tracker, user_id)
         for record in results:
             recorded_at, systolic, diastolic, pulse = record
             if is_critical(systolic, diastolic, pulse, systolic_span, diastolic_span):
@@ -502,13 +508,13 @@ class ActionGetLocationSpecificBloodPressure(Action):
         return []
 
 
-
 def get_days_ago(date):
     if date is None:
         return None
     if isinstance(date, str):
         date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
     return (datetime.now() - date).days
+
 
 class ActionBloodPressureHomeVsOther(Action):
     def name(self) -> Text:
@@ -523,6 +529,7 @@ class ActionBloodPressureHomeVsOther(Action):
         # TODO: Implement the action
         dispatcher.utter_message("This is a dummy action for the intent 'blood_pressure_home_vs_other'.")
         return []
+
 
 class ActionUserMedicalPreconditions(Action):
     def name(self) -> Text:

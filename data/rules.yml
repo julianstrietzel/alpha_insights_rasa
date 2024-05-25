@@ -5,6 +5,7 @@ rules:
     steps:
       - intent: greet
       - action: action_respond_to_greeting
+
   - rule: story_goodbye
     steps:
       - intent: goodbye

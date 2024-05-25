@@ -125,16 +125,17 @@ class DBHandler:
         return markdown_output
 
 
-def get_blood_pressure_spans(tracker, user_id):
+def get_blood_pressure_spans(tracker, user_id) -> Tuple[Tuple[int, int], Tuple[int, int], str]:
     birthday = datetime.strptime(tracker.get_slot("birthday"), "%Y-%m-%d") if tracker.get_slot(
         "birthday") is not None else None
     systolic_span, diastolic_span = None, None
     if not birthday:
         query = f"""SELECT birthday FROM patient WHERE user_id = {user_id};"""
         result = DBHandler().execute_query(query)[0]
+        print(result)
         birthday = datetime.strptime(result[0], "%Y-%m-%d") if result else None
     if birthday:
-        age = (datetime.now() - birthday.days // 365)
+        age = (datetime.now() - birthday).days // 365
         if age < 18:
             systolic_span = (90, 120)
             diastolic_span = (60, 80)
@@ -151,4 +152,5 @@ def get_blood_pressure_spans(tracker, user_id):
     else:
         systolic_span = (120, 130)
         diastolic_span = (80, 85)
-    return systolic_span, diastolic_span
+        age = "unknown"
+    return systolic_span, diastolic_span, str(age)
