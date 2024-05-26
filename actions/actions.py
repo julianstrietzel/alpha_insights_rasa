@@ -12,7 +12,7 @@ from rasa_sdk.events import SlotSet
 
 class ActionAskGPT(Action):
     def __init__(self):
-        self.gpt_handler = GPTHandler()
+        self.gpt_handler : GPTHandler = GPTHandler()
         super().__init__()
 
     def name(self) -> Text:
@@ -61,6 +61,7 @@ class ActionGetBasicUserDetails(Action):
             print(result)
             # log result datatype
             print(type(result))
+            patient_details = None
             if result:
                 result = result[0]
                 patient_details = {
@@ -455,7 +456,7 @@ class ActionCriticalBloodPressureAlerts(Action):
         for record in results:
             recorded_at, systolic, diastolic, pulse = record
             if is_critical(systolic, diastolic, pulse, systolic_span, diastolic_span):
-                critical_readings.append((recorded_at, systolic, diastolic))
+                critical_readings.append((recorded_at, systolic, diastolic, pulse))
 
         if not critical_readings:
             dispatcher.utter_message("No critical blood pressure readings found for the provided user id.")
@@ -465,7 +466,8 @@ class ActionCriticalBloodPressureAlerts(Action):
         for reading in critical_readings:
             recorded_at, systolic, diastolic, pulse = reading
             in_geofence = check_most_recent_geofence(recorded_at, user_id)
-            response += f"Recorded at: {recorded_at}, Systolic: {systolic} mmHg, Diastolic: {diastolic} mmHg, Pulse: {pulse}, In Geofence: {in_geofence}\n"
+            response += (f"Recorded at: {recorded_at}, Systolic: {systolic} mmHg, Diastolic: {diastolic} mmHg, "
+                         f"Pulse: {pulse}, In Geofence: {in_geofence}\n")
 
         dispatcher.utter_message(response)
         return []
@@ -616,6 +618,7 @@ class ActionUserMedicalPreconditions(Action):
             query = f"SELECT medical_preconditions FROM patient WHERE user_id = {user_id};"
             result = DBHandler().execute_query(query)
             print(result)
+            medical_preconditions = None
             if result:
                 medical_preconditions = result[0][0]
                 response = medical_preconditions if medical_preconditions else "No medical preconditions found."

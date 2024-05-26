@@ -46,31 +46,31 @@ Everytime you run into problems, please just try your best and different approac
             ]
         )
 
-        def ask_question(question: str, gui=None):
-            thread = self.thread or self.client.beta.threads.create()
-            self.client.beta.threads.messages.create(
+    def execute_query(self, question: str, gui=None):
+        thread = self.thread or self.client.beta.threads.create()
+        self.client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=question,
+        )
+        with self.client.beta.threads.runs.stream(
                 thread_id=thread.id,
-                role="user",
-                content=question,
-            )
-            with self.client.beta.threads.runs.stream(
-                    thread_id=thread.id,
-                    assistant_id=self.assistant.id,
-                    event_handler=EventHandler(gui=gui, gpt_handler=self)
-            ) as stream:
-                for text in stream.text_deltas:
-                    if gui:
-                        gui.add_text(text)
-                    else:
-                        print(text, end="", flush=True)
-                stream.until_done()
-            return thread
+                assistant_id=self.assistant.id,
+                event_handler=EventHandler(gui=gui, gpt_handler=self)
+        ) as stream:
+            for text in stream.text_deltas:
+                if gui:
+                    gui.add_text(text)
+                else:
+                    print(text, end="", flush=True)
+            stream.until_done()
+        return thread
 
 
 class EventHandler(AssistantEventHandler):
 
-    def __init__(self, gui=None, gpt_handlers=None):
-        self.gpt_handler = gpt_handlers if gpt_handlers else GPTHandler()
+    def __init__(self, gui=None, gpt_handler=None):
+        self.gpt_handler = gpt_handler if gpt_handler else GPTHandler()
         self.gui = gui
         super().__init__()
 
