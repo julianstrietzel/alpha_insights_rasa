@@ -46,11 +46,14 @@ class DBHandler:
 
     def __init__(self):
         if DBHandler.conn is None:
-            DBHandler.conn = psycopg2.connect(
-                host="localhost",
-                database="insights",
-                user="insights",
-                port="5432", )
+            try:
+                DBHandler.conn = psycopg2.connect(
+                    host="localhost",
+                    database="insights",
+                    user="insights",
+                    port="5432", )
+            except psycopg2.OperationalError as e:
+                raise ConnectionError("Please start the database for our client first!\nError message: " + str(e))
             DBHandler.cur = self.conn.cursor()
 
     def execute_query(self, query) -> [List[Tuple], str]:
