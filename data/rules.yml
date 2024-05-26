@@ -41,6 +41,11 @@ rules:
       - intent: blood_pressure_trends_three_months
       - action: action_get_blood_pressure_trends_three_months
 
+  - rule: story_high_blood_pressure_readings
+    steps:
+      - intent: high_blood_pressure_readings
+      - action: action_high_blood_pressure_readings
+
   - rule: check_blood_pressure_time_of_day
     steps:
       - intent: blood_pressure_time_of_day

@@ -14,7 +14,7 @@ intents:
   - blood_pressure_home_vs_other
   - user_medical_preconditions
   - blood_pressure_trend_changed_since_date
-  - high_bloodpressure_readings
+  - high_blood_pressure_readings
   - ask_gpt
 
 
@@ -31,7 +31,7 @@ responses:
     - text: "Bye"
 
   utter_bot_challenge:
-    - text: "I am a bot, what do you want me to do?"
+    - text: "I am a bot. I can help you to get deeper insights into the user data provided. What do you want me to look into?"
 
 
   utter_ask_user_id:
@@ -127,5 +127,5 @@ actions:
   - action_compare_blood_pressure_home_vs_other
   - action_get_user_medical_preconditions
   - action_blood_pressure_trend_changed_since_date
-  - action_high_bloodpressure_readings
+  - action_high_blood_pressure_readings
 

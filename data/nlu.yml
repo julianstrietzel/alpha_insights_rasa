@@ -122,10 +122,11 @@ nlu:
     - How did the user's blood pressure trend in the past months?
     - Can I see the user's blood pressure trends over the last three months?
 
-- intent: high_bloodpressure_readings
+- intent: high_blood_pressure_readings
   examples: |
     - Any high blood pressure readings?
     - Extreme blood pressure
+    - high blood pressure reading?  
     - Special blood pressure readings
     - Anything special about the blood pressure?
     - Unusual blood pressure readings
@@ -138,7 +139,7 @@ nlu:
     - Were there [high](direction) [systolic](type) blood pressure readings in the last week for the user?
     - Has the user's [systolic](type) pressure been [lower](direction) than [90](limit) mmHg in the past week?
     - Any [diastolic](type) blood pressure readings below [80](limit) for the user this week?
-
+# TODO add entities for 3 months vs. 2 weeks etc...
 - synonym: systolic
   examples: |
     - Systolic

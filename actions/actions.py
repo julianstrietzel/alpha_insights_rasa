@@ -155,28 +155,71 @@ class ActionGetBloodPressureTrendsThreeMonths(Action):
             return []
 
         response = "Blood pressure trends for the past three months:\n"
+        prev = None
         for record in results:
             month, max_systolic, min_systolic, avg_systolic, max_diastolic, min_diastolic, avg_diastolic, max_pulse, min_pulse, avg_pulse, measurement_count = record
-            response += (f"Month: {month.strftime('%B %Y')}\n"
-                         f"Measurements: {measurement_count}\n"
-                         f"Max Systolic: {max_systolic}, Min Systolic: {min_systolic}, Avg Systolic: {avg_systolic:.2f}\n"
-                         f"Max Diastolic: {max_diastolic}, Min Diastolic: {min_diastolic}, Avg Diastolic: {avg_diastolic:.2f}\n"
-                         f"Max Pulse: {max_pulse}, Min Pulse: {min_pulse}, Avg Pulse: {avg_pulse:.2f}\n\n")
-
-
+            response += f"Month: {month.strftime('%B %Y')}\n"
+            response += f"Measurements: {measurement_count}"
+            if prev:
+                response += get_trend(prev["measurement_count"], measurement_count)
+            response += f"\nMax Systolic: {max_systolic}, Min Systolic: {min_systolic}, Avg Systolic: {avg_systolic:.2f}"
+            if prev:
+                response += get_trend(prev["avg_systolic"], avg_systolic)
+            response += f"\nMax Diastolic: {max_diastolic}, Min Diastolic: {min_diastolic}, Avg Diastolic: {avg_diastolic:.2f}"
+            if prev:
+                response += get_trend(prev["avg_diastolic"], avg_diastolic)
+            response += f"\nMax Pulse: {max_pulse}, Min Pulse: {min_pulse}, Avg Pulse: {avg_pulse:.2f}"
+            if prev:
+                response += get_trend(prev["avg_pulse"], avg_pulse)
+            prev = {
+                "month": month,
+                "max_systolic": max_systolic,
+                "min_systolic": min_systolic,
+                "avg_systolic": avg_systolic,
+                "max_diastolic": max_diastolic,
+                "min_diastolic": min_diastolic,
+                "avg_diastolic": avg_diastolic,
+                "max_pulse": max_pulse,
+                "min_pulse": min_pulse,
+                "avg_pulse": avg_pulse,
+                "measurement_count": measurement_count
+            }
+            response += "\n\n"
         systolic_span, diastolic_span, age = get_blood_pressure_spans(tracker, user_id)
 
         response += (f"Recommended blood pressure spans for patients in this age group ({age}):\n"
-                     f"Systolic: {systolic_span[0]} - {systolic_span[1]}\n"
-                     f"Diastolic: {diastolic_span[0]} - {diastolic_span[1]}\n")
+                     f"Systolic: {systolic_span[0]} - {systolic_span[1]} "
+                     f"({get_within(systolic_span, prev['avg_systolic'])})\n" 
+                     f"Diastolic: {diastolic_span[0]} - {diastolic_span[1]} "
+                     f"({get_within(diastolic_span, prev['avg_diastolic'])})\n")
 
         dispatcher.utter_message(response)
         return []
 
 
+def get_within(span, value) -> str:
+    if span[0] <= value <= span[1]:
+        return "within"
+    elif value < span[0]:
+        return "below"
+    elif value > span[1]:
+        return "above"
+    else:
+        return "unknown"
+
+
+def get_trend(prev, curr) -> str:
+    if curr > prev:
+        return " (up)"
+    elif curr < prev:
+        return " (down)"
+    else:
+        return " (no change)"
+
+
 class ActionHighBloodPressureReadings(Action):
     def name(self) -> Text:
-        return "action_high_bloodpressure_readings"
+        return "action_high_blood_pressure_readings"
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         user_id = tracker.get_slot("user_id")
@@ -185,9 +228,10 @@ class ActionHighBloodPressureReadings(Action):
             return []
 
         # Retrieve the type, direction, and limit from the entities
-        bp_type = tracker.get_latest_entity_values("type")
-        direction = tracker.get_latest_entity_values("direction")
-        limit = tracker.get_latest_entity_values("limit")
+        bp_type = next(tracker.get_latest_entity_values("type"), "systolic")
+        direction = next(tracker.get_latest_entity_values("direction"), "higher")
+        limit = next(tracker.get_latest_entity_values("limit"), 0)
+
         # Define the SQL query
         if "low" in direction:
             operator = "<"
@@ -198,31 +242,42 @@ class ActionHighBloodPressureReadings(Action):
             return []
 
         if bp_type == "pulse":
-            limit = int(limit) if limit else 110
+            limit = int(limit) if limit and limit != 0 else 110
         else:
             limit = int(limit) if limit and limit != 0 \
                 else get_blood_pressure_spans(tracker, user_id)[0 if bp_type == "systolic" else 1][
                 0 if operator == "<" else 1]
-
+        time_span = "1 MONTH"
         query = f"""
-        SELECT recorded_at, {bp_type}
+        SELECT recorded_at, systolic, diastolic, pulse
         FROM bloodpressure
-        WHERE user_id = {user_id} AND {bp_type} {operator} {limit} AND recorded_at >= NOW() - INTERVAL '1 MONTH'
+        WHERE user_id = {user_id} AND {bp_type} {operator} {limit} 
+        AND CAST(recorded_at AS timestamp) > NOW() - INTERVAL '{time_span}'
         ORDER BY recorded_at DESC;
+        """
+        count_all_measurements = f"""
+        SELECT COUNT(*)
+        FROM bloodpressure
+        WHERE user_id = {user_id} AND CAST(recorded_at AS timestamp) > NOW() - INTERVAL '{time_span}';
         """
 
         # Execute the query
         results = DBHandler().execute_query(query)
         if not results:
             dispatcher.utter_message(
-                f"No {bp_type} readings {direction} than {limit} mmHg in the past month for the provided user id.")
+                f"No {bp_type} measurements {direction} than {limit} {'mmhg ' if type != 'pulse' else ''}"
+                f"in the past month for the provided user id.")
             return []
 
         # Format the response
-        response = f"There are {len(results)} {bp_type.capitalize()} blood pressure readings {direction} than {limit} mmHg in the past month:\n"
+        response = (f"Of the {DBHandler().execute_query(count_all_measurements)[0][0]} blood pressure measurements "
+                    f"in the last {time_span.lower()} "
+                    f"there are {len(results)} {bp_type.capitalize()} blood pressure readings {direction} than {limit}"
+                    f"{' mmhg' if type != 'pulse' else ''}:\n")
         for record in results:
-            recorded_at, bp_reading = record
-            response += f"{recorded_at.strftime('%Y-%m-%d %H:%M:%S')}: {bp_reading} mmHg\n"
+            recorded_at, systolic, diastolic, pulse = record
+            response += (f"{datetime.strptime(recorded_at, '%Y-%m-%d %H:%M:%S.%f').strftime('%H:%M, %B %d, %Y')}:"
+                         f" Systolic = {systolic} mmHg, diastolic = {diastolic} mmHg, pulse = {pulse}\n")
 
         dispatcher.utter_message(response)
         return []
@@ -240,9 +295,9 @@ class ActionBloodPressureGeofenceCorrelation(Action):
 
         # Define the SQL query to get blood pressure readings and geofence status
         query = f"""
-        SELECT recorded_at, systolic, diastolic, geofence_status
+        SELECT recorded_at, systolic, diastolic, pulse
         FROM bloodpressure
-        WHERE user_id = {user_id} AND recorded_at >= NOW() - INTERVAL '3 MONTH'
+        WHERE user_id = {user_id} AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 MONTH'
         ORDER BY recorded_at DESC;
         """
 
