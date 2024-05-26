@@ -3,6 +3,7 @@ version: "3.1"
 intents:
   - greet
   - goodbye
+  - confirm
   - blood_pressure_last_recorded
   - user_nickname
   - provide_user_id
@@ -39,6 +40,9 @@ responses:
     - text: "What is the user ID?"
     - text: "Can you tell me the user ID of the patient of concern?"
 
+  utter_gpt_instructions:
+    - text: "You will start a conversation with a LLM Chatbot that can help you extract data. This bot can make mistakes! To leave this chat and continue with our rule based chatbot, type 'exit'."
+
 
 session_config:
   session_expiration_time: 60
@@ -51,6 +55,8 @@ entities:
   - limit
   - date
   - location
+  - timespan
+  - number
 
 slots:
   user_id:
@@ -61,11 +67,13 @@ slots:
       entity: user_id
       intent: provide_user_id
     - type: custom
-  context:
-    type: text
+
+  gpt_confirmed:
+    type: bool
+    initial_value: False
+    influence_conversation: True
     mappings:
     - type: custom
-      intent: ask_gpt
 
   nickname:
       type: text
@@ -128,4 +136,6 @@ actions:
   - action_get_user_medical_preconditions
   - action_blood_pressure_trend_changed_since_date
   - action_high_blood_pressure_readings
+  - action_ask_gpt
+  - action_set_gpt_confirmed
 

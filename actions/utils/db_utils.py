@@ -44,7 +44,7 @@ class DBHandler:
     conn = None
     cur = None
 
-    def __init__(self):
+    def __init__(self, silent = False):
         if DBHandler.conn is None:
             try:
                 DBHandler.conn = psycopg2.connect(
@@ -55,9 +55,11 @@ class DBHandler:
             except psycopg2.OperationalError as e:
                 raise ConnectionError("Please start the database for our client first!\nError message: " + str(e))
             DBHandler.cur = self.conn.cursor()
+        self.silent = silent
 
     def execute_query(self, query) -> [List[Tuple], str]:
-        print("Executing query: ", query)
+        if not self.silent:
+            print("Executing query: ", query)
         try:
             self.cur.execute(query)
             results = self.cur.fetchall()
@@ -157,3 +159,19 @@ def get_blood_pressure_spans(tracker, user_id) -> Tuple[Tuple[int, int], Tuple[i
         diastolic_span = (80, 85)
         age = "unknown"
     return systolic_span, diastolic_span, str(age)
+
+
+def geofence_data_available(user_id) -> bool:
+    """
+    Check if valid geofence data is available for the user
+    :param user_id:
+    :return: boolean
+    """
+    query = f"""SELECT *
+FROM geo_location
+WHERE user_id = {user_id}
+  AND geo_fence_status
+    not in ('GEOFENCE_DISABLED', 'UNKNOWN', 'ACCURACY_NEEDS_REFINEMENT', 'ESTIMATED_MEASURE_TO_BE_IGNORED')
+ORDER BY recorded_at DESC
+LIMIT 1;"""
+    return bool(DBHandler().execute_query(query))

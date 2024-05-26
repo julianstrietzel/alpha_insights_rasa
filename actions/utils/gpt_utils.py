@@ -3,7 +3,7 @@ import json
 from openai import OpenAI
 from openai.lib.streaming import AssistantEventHandler
 
-from actions.db_utils import DBHandler
+from actions.utils.db_utils import DBHandler
 
 
 class GPTHandler:
@@ -46,7 +46,7 @@ Everytime you run into problems, please just try your best and different approac
             ]
         )
 
-    def execute_query(self, question: str, gui=None):
+    def execute_query(self, question: str, output_function: callable = None):
         thread = self.thread or self.client.beta.threads.create()
         self.client.beta.threads.messages.create(
             thread_id=thread.id,
@@ -56,11 +56,11 @@ Everytime you run into problems, please just try your best and different approac
         with self.client.beta.threads.runs.stream(
                 thread_id=thread.id,
                 assistant_id=self.assistant.id,
-                event_handler=EventHandler(gui=gui, gpt_handler=self)
+                event_handler=EventHandler(output_function=output_function, gpt_handler=self)
         ) as stream:
             for text in stream.text_deltas:
-                if gui:
-                    gui.add_text(text)
+                if output_function:
+                    output_function(text)
                 else:
                     print(text, end="", flush=True)
             stream.until_done()
@@ -69,9 +69,9 @@ Everytime you run into problems, please just try your best and different approac
 
 class EventHandler(AssistantEventHandler):
 
-    def __init__(self, gui=None, gpt_handler=None):
+    def __init__(self, output_function:callable=None, gpt_handler=None):
         self.gpt_handler = gpt_handler if gpt_handler else GPTHandler()
-        self.gui = gui
+        self.output_function = output_function
         super().__init__()
 
     def on_event(self, event):
@@ -101,7 +101,7 @@ class EventHandler(AssistantEventHandler):
                 event_handler=EventHandler(),
         ) as stream:
             for text in stream.text_deltas:
-                if self.gui:
-                    self.gui.add_text(text)
+                if self.output_function:
+                    self.output_function(text)
                 else:
                     print(text, end="", flush=True)

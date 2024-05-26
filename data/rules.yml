@@ -6,6 +6,15 @@ rules:
       - intent: greet
       - action: action_respond_to_greeting
 
+  - rule: If fallback ask for confirmation to use gpt
+    steps:
+      - intent: fallback
+      - action: action_ask_gpt
+      - intent: confirm
+      - action: action_set_gpt_confirmed
+      - action: utter_gpt_instructions
+      - action: action_ask_gpt
+
   - rule: story_goodbye
     steps:
       - intent: goodbye

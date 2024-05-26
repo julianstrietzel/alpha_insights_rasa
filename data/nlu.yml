@@ -32,6 +32,29 @@ nlu:
     - user [2](user_id)
     - [2](user_id)
 
+- intent: confirm
+  examples: |
+    - yes
+    - yes sure
+    - of course
+    - definitely
+    - please do so
+    - yeah
+    - sure
+    - yes please
+    - yes, please
+    - yes, I would
+    - yes, I would like that
+    - yes, I would like to know
+    - sure
+    - I would like that
+    - I would like to know
+    - I would like that
+    - lets see
+    - I want to know that
+    - I want to know that please
+    - I want to know please
+
 - intent: bot_challenge
   examples: |
     - are you a bot?
@@ -125,20 +148,20 @@ nlu:
 - intent: high_blood_pressure_readings
   examples: |
     - Any high blood pressure readings?
-    - Extreme blood pressure
+    - Extreme blood pressure recent [weeks](timespan)
     - high blood pressure reading?  
     - Special blood pressure readings
     - Anything special about the blood pressure?
     - Unusual blood pressure readings
-    - Has the user had any readings of [systolic](type) blood pressure [higher](direction) than [130](limit) mmHg in the last month?
+    - Has the user had any readings of [systolic](type) blood pressure [higher](direction) than [130](limit) mmHg in the last [month](timespan)?
     - Did the user have any high [systolic](type) blood pressure readings recently?
-    - Show me if the user's [systolic](type) pressure exceeded [130](limit) mmHg in the last months.
-    - Were there any instances of high [systolic](type) blood pressure for the user the last weeks?
-    - Has the user recorded any [systolic](type) blood pressure above [130](limit) mmHg in the past weeks?
+    - Show me if the user's [systolic](type) pressure exceeded [130](limit) mmHg in the last [months](timespan).
+    - Were there any instances of high [systolic](type) blood pressure for the user the last [days](timespan)?
+    - Has the user recorded any [systolic](type) blood pressure above [130](limit) mmHg in the past [days](timespan)?
     - Did the user have [diastolic](type) readings over [130](limit) mmHg recently?
-    - Were there [high](direction) [systolic](type) blood pressure readings in the last week for the user?
-    - Has the user's [systolic](type) pressure been [lower](direction) than [90](limit) mmHg in the past week?
-    - Any [diastolic](type) blood pressure readings below [80](limit) for the user this week?
+    - Were there [high](direction) [systolic](type) blood pressure readings in the last [week](timespan) for the user?
+    - Has the user's [systolic](type) pressure been [lower](direction) than [90](limit) mmHg in the past [month](timespan)?
+    - Any [diastolic](type) blood pressure readings below [80](limit) for the user this [week](timespan)?
 # TODO add entities for 3 months vs. 2 weeks etc...
 - synonym: systolic
   examples: |
@@ -165,6 +188,29 @@ nlu:
     - below
     - under
     - less than
+
+- synonym: month
+  examples: |
+    - month
+    - months
+    - Months
+    - month's
+    - monthes
+    - week
+    - weeks
+    - Weeks
+    - week's
+    - weekes
+
+- synonym: day
+  examples: |
+    - day
+    - days
+    - Days
+    - day's
+    - dayes
+
+
 
 - intent: blood_pressure_time_of_day
   examples: |
@@ -198,7 +244,7 @@ nlu:
     - Were there critical blood pressure readings for the user and where?
     - Where was the user when they had critical blood pressure readings?
 
-- intent: location_specific_blood_pressure # merge with inside accordingly in others
+- intent: location_specific_blood_pressure
   examples: |
     - blood pressure [at home](location)
     - blood pressure [outside](location)
@@ -220,9 +266,12 @@ nlu:
   examples: |
     - inside
     - indoors
+    - insid
+    - in
     - within
     - at home
     - home
+    - IN
     - within the geofence
     - in the geofence 
 
