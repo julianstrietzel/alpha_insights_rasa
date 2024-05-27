@@ -343,5 +343,10 @@ nlu:
     - Let me talk to gpt
     - give me llm 
     - use gpt 4
+    - ask gpt whether there was something special in the data
+    - ask gpt about the user's blood pressure
+    - ask gpt about the user's medical preconditions
+    - ask gpt about the user's blood pressure trends
+    - ask gpt  ask gpt  We changed the medicine of the user 1 month ago. Could you compare the blood pressure values before and after?
     
 
