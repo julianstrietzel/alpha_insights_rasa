@@ -8,12 +8,23 @@ rules:
 
   - rule: If fallback ask for confirmation to use gpt
     steps:
-      - intent: fallback
+      - intent: nlu_fallback
       - action: action_ask_gpt
-      - intent: confirm
-      - action: action_set_gpt_confirmed
-      - action: utter_gpt_instructions
+
+  - rule: If ask_gpt ask for confirmation to use gpt
+    steps:
+      - intent: ask_gpt
       - action: action_ask_gpt
+
+
+  - rule: gpt loop
+    condition:
+      - slot_was_set:
+        - gpt_confirmed: True
+    steps:
+      - action: action_ask_gpt
+
+
 
   - rule: story_goodbye
     steps:
@@ -73,7 +84,7 @@ rules:
   - rule: compare_blood_pressure_home_vs_other
     steps:
       - intent: blood_pressure_home_vs_other
-      - action: action_compare_blood_pressure_home_vs_other
+      - action: action_blood_pressure_home_vs_other
 
   - rule: get_user_medical_preconditions
     steps:
@@ -84,3 +95,4 @@ rules:
     steps:
       - intent: blood_pressure_trend_changed_since_date
       - action: action_blood_pressure_trend_changed_since_date
+

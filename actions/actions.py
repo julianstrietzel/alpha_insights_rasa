@@ -2,39 +2,48 @@ from datetime import datetime
 from typing import Any, Text, Dict, List, Tuple, Optional
 
 from rasa_sdk import Action, Tracker
+from rasa_sdk.events import SlotSet, FollowupAction
 from rasa_sdk.executor import CollectingDispatcher
 
-from actions.utils.db_utils import DBHandler, get_blood_pressure_spans, geofence_data_available
+from actions.utils.db_utils import DBHandler
 from actions.utils.gpt_utils import GPTHandler
-
-from rasa_sdk.events import SlotSet
-
 from actions.utils.utils import get_within, get_trend, is_critical, get_bloodpressure, check_most_recent_geofence, \
-    get_days_ago
+    get_days_ago, get_blood_pressure_spans, geofence_data_available
 
 
 class ActionAskGPT(Action):
     def __init__(self):
-        self.gpt_handler: GPTHandler = GPTHandler()
+        self.gpt_handler = None
         super().__init__()
 
     def name(self) -> Text:
         return "action_ask_gpt"
 
     async def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        if tracker.get_slot("gpt_confirmed") != "true":
+        if not tracker.get_slot("gpt_confirmed"):
+            dispatcher.utter_message("We did not match the request you had to our database. "
+                                     "Let me ask GPT, whether it could help us.")
             dispatcher.utter_message("Please confirm that you want to ask GPT.")
             return []
-        user_input = next(tracker.latest_message.get('text'), None)
+        # if last input was "exit" leave gpt loop
+        print(str(tracker.latest_message.keys()))
+        if tracker.latest_message.get('text') == "exit":
+            dispatcher.utter_message("Exiting GPT.")
+            print("Exiting GPT.")
+            self.gpt_handler = None
+            return [SlotSet("gpt_confirmed", False), FollowupAction("action_listen")]
+        dispatcher.utter_message("Currently using GPT to answer your question. Please wait a moment.")
+        user_input = tracker.latest_message.get('text')
+        patient_details = str(tracker.slots)
+        print("Patient details log " + patient_details)
+        if not self.gpt_handler:
+            self.gpt_handler = GPTHandler(basic_information=patient_details)
+
         if user_input is None:
             raise ValueError("No user input provided to ask to GPT.")
             return []
-        dispatcher.utter_message("We did not match the request you had to our database. "
-                                 "Let me ask GPT, whether it could help us.")
-        self.gpt_handler.execute_query(user_input, dispatcher.utter_message)
-        continue_query = ("Are you ready with your answer on the previous question? If yes, please answer with 'ready'."
-                          " Otherwise use your tools ans knowledge to generate an advanced answer.")
 
+        await self.gpt_handler.execute_query(user_input, output_function=dispatcher.utter_message)
         return []
 
 
@@ -43,7 +52,11 @@ class ActionSetGPTConfirmed(Action):
         return "action_set_gpt_confirmed"
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        return [SlotSet("gpt_confirmed", "true")]
+        dispatcher.utter_message("You will start a conversation with a LLM Chatbot that can help you extract data. "
+                                 "This bot can make mistakes! To leave this chat and continue with our rule "
+                                 "based chatbot, type 'exit'.")
+        return [SlotSet("gpt_confirmed", True), FollowupAction("action_ask_gpt")]
+
 
 class ActionGetBasicUserDetails(Action):
     def name(self) -> Text:
@@ -110,7 +123,7 @@ class ActionGetBasicUserDetails(Action):
                     ("Sex", patient_details['sex']),
                     ("Medical Preconditions", patient_details['medical_preconditions'])
                 ]:
-                    if detail_value is not None:
+                    if detail_value is not None and detail_value != "":
                         response += f"{detail_name}: {detail_value}\n"
             else:
                 response = "No patient found with the given user ID."
@@ -193,7 +206,7 @@ class ActionGetBloodPressureTrendsThreeMonths(Action):
         AVG(pulse) AS avg_pulse,
         COUNT(*) AS measurement_count
     FROM bloodpressure
-    WHERE user_id = 1900413 AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 MONTHS'
+    WHERE user_id = {user_id} AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 MONTHS'
     GROUP BY month
     ORDER BY month;
 """

@@ -8,11 +8,10 @@ from actions.utils.db_utils import DBHandler
 
 class GPTHandler:
 
-    def __init__(self):
-        self.db_handler = DBHandler()
-        db_schema = DBHandler.generate_markdown(self.db_handler.get_table_schema())
+    def __init__(self, basic_information: str = ""):
+        db_schema = DBHandler.generate_markdown(DBHandler().get_table_schema())
         self.client = OpenAI(api_key="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")
-        self.thread = None
+        self.thread = self.client.beta.threads.create()
         self.assistant = self.client.beta.assistants.create(
             name="PostgresSQL Data Extractor",
             instructions=f"""
@@ -24,7 +23,7 @@ Provide answers in professional medical langugage being precise and short, as th
 Everytime you run into problems, please just try your best and different approaches to solve the problem, get different views on the data and use sql functions to write stuff.
 # Database Schema
 
-""" + db_schema,
+""" + db_schema + basic_information,
             model="gpt-3.5-turbo",
             tools=[
                 {"type": "function",
@@ -46,8 +45,8 @@ Everytime you run into problems, please just try your best and different approac
             ]
         )
 
-    def execute_query(self, question: str, output_function: callable = None):
-        thread = self.thread or self.client.beta.threads.create()
+    async def execute_query(self, question: str, output_function: callable):
+        thread = self.thread
         self.client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
@@ -61,8 +60,7 @@ Everytime you run into problems, please just try your best and different approac
             for text in stream.text_deltas:
                 if output_function:
                     output_function(text)
-                else:
-                    print(text, end="", flush=True)
+                print(text, end="", flush=True)
             stream.until_done()
         return thread
 
@@ -71,6 +69,7 @@ class EventHandler(AssistantEventHandler):
 
     def __init__(self, output_function:callable=None, gpt_handler=None):
         self.gpt_handler = gpt_handler if gpt_handler else GPTHandler()
+        self.db_handler = DBHandler(output_function, stringify_output=True)
         self.output_function = output_function
         super().__init__()
 
@@ -86,14 +85,20 @@ class EventHandler(AssistantEventHandler):
 
         for tool in data.required_action.submit_tool_outputs.tool_calls:
             if tool.function.name == "execute_sql_statement":
-                result = DBHandler().execute_query(json.loads(tool.function.arguments)["query"])
-                tool_outputs.append({"tool_call_id": tool.id, "output": result})
+                try:
+                    result = self.db_handler.execute_query(json.loads(tool.function.arguments)["query"])
+                    tool_outputs.append({"tool_call_id": tool.id, "output": result})
+                except Exception as e:
+                    print("During execution of the database query the following error was rasied: " + e)
+                    tool_outputs.append({"tool_call_id": tool.id,
+                                         "output": "An error occurred during the execution of the query: " +e})
 
         # Submit all tool_outputs at the same time
         self.submit_tool_outputs(tool_outputs, run_id)
 
     def submit_tool_outputs(self, tool_outputs, run_id):
         # Use the submit_tool_outputs_stream helper
+        print("Submitting tool outputs" + str(tool_outputs))
         with self.gpt_handler.client.beta.threads.runs.submit_tool_outputs_stream(
                 thread_id=self.current_run.thread_id,
                 run_id=self.current_run.id,
@@ -103,5 +108,5 @@ class EventHandler(AssistantEventHandler):
             for text in stream.text_deltas:
                 if self.output_function:
                     self.output_function(text)
-                else:
-                    print(text, end="", flush=True)
+
+                print(text, end="", flush=True)

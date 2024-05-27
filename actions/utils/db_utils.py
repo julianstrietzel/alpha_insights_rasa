@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Tuple
 
 import psycopg2
@@ -44,7 +43,9 @@ class DBHandler:
     conn = None
     cur = None
 
-    def __init__(self, silent = False):
+    def __init__(self, silent=False, output_function=print, stringify_output=False):
+        self.output_function = output_function
+        self.stringify = stringify_output
         if DBHandler.conn is None:
             try:
                 DBHandler.conn = psycopg2.connect(
@@ -59,10 +60,12 @@ class DBHandler:
 
     def execute_query(self, query) -> [List[Tuple], str]:
         if not self.silent:
-            print("Executing query: ", query)
+            self.output_function("Executing query: ", query)
         try:
             self.cur.execute(query)
             results = self.cur.fetchall()
+            if self.stringify:
+                results = str(results)
             return results
         except psycopg2.OperationalError as e:
             self.conn.rollback()
@@ -130,48 +133,3 @@ class DBHandler:
         return markdown_output
 
 
-def get_blood_pressure_spans(tracker, user_id) -> Tuple[Tuple[int, int], Tuple[int, int], str]:
-    birthday = datetime.strptime(tracker.get_slot("birthday"), "%Y-%m-%d") if tracker.get_slot(
-        "birthday") is not None else None
-    systolic_span, diastolic_span = None, None
-    if not birthday:
-        query = f"""SELECT birthday FROM patient WHERE user_id = {user_id};"""
-        result = DBHandler().execute_query(query)[0]
-        print(result)
-        birthday = datetime.strptime(result[0], "%Y-%m-%d") if result else None
-    if birthday:
-        age = (datetime.now() - birthday).days // 365
-        if age < 18:
-            systolic_span = (90, 120)
-            diastolic_span = (60, 80)
-        elif age < 40:
-            systolic_span = (110, 130)
-            diastolic_span = (70, 85)
-        elif age < 60:
-            systolic_span = (120, 140)
-            diastolic_span = (75, 90)
-        else:
-            systolic_span = (130, 150)
-            diastolic_span = (80, 95)
-
-    else:
-        systolic_span = (120, 130)
-        diastolic_span = (80, 85)
-        age = "unknown"
-    return systolic_span, diastolic_span, str(age)
-
-
-def geofence_data_available(user_id) -> bool:
-    """
-    Check if valid geofence data is available for the user
-    :param user_id:
-    :return: boolean
-    """
-    query = f"""SELECT *
-FROM geo_location
-WHERE user_id = {user_id}
-  AND geo_fence_status
-    not in ('GEOFENCE_DISABLED', 'UNKNOWN', 'ACCURACY_NEEDS_REFINEMENT', 'ESTIMATED_MEASURE_TO_BE_IGNORED')
-ORDER BY recorded_at DESC
-LIMIT 1;"""
-    return bool(DBHandler().execute_query(query))

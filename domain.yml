@@ -4,6 +4,7 @@ intents:
   - greet
   - goodbye
   - confirm
+  - bot_challenge
   - blood_pressure_last_recorded
   - user_nickname
   - provide_user_id
@@ -39,10 +40,6 @@ responses:
     - text: "Please provide the user ID"
     - text: "What is the user ID?"
     - text: "Can you tell me the user ID of the patient of concern?"
-
-  utter_gpt_instructions:
-    - text: "You will start a conversation with a LLM Chatbot that can help you extract data. This bot can make mistakes! To leave this chat and continue with our rule based chatbot, type 'exit'."
-
 
 session_config:
   session_expiration_time: 60
@@ -132,7 +129,7 @@ actions:
   - action_check_blood_pressure_time_of_day
   - action_critical_blood_pressure_alerts
   - action_get_location_specific_blood_pressure
-  - action_compare_blood_pressure_home_vs_other
+  - action_blood_pressure_home_vs_other
   - action_get_user_medical_preconditions
   - action_blood_pressure_trend_changed_since_date
   - action_high_blood_pressure_readings

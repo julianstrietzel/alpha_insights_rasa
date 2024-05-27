@@ -40,6 +40,8 @@ nlu:
     - definitely
     - please do so
     - yeah
+    - confirm
+    - yes please
     - sure
     - yes please
     - yes, please
@@ -246,6 +248,8 @@ nlu:
 
 - intent: location_specific_blood_pressure
   examples: |
+    - location specific blood pressure
+    - blood pressure at different locations
     - blood pressure [at home](location)
     - blood pressure [outside](location)
     - blood pressure [within the geofence](location)
@@ -336,9 +340,8 @@ nlu:
 
 - intent: ask_gpt
   examples: |
-    - More details on this please.
-    - I don't understand.
-    - Can you elaborate?
-    - What?
-    - I need more information.
+    - Let me talk to gpt
+    - give me llm 
+    - use gpt 4
+    
 

@@ -1,3 +1,22 @@
 version: "3.1"
 
 stories:
+  - story: If fallback ask for confirmation to use gpt
+    steps:
+      - intent: nlu_fallback
+      - action: action_ask_gpt
+      - intent: confirm
+      - action: action_set_gpt_confirmed
+
+  - story: If ask_gpt ask for confirmation to use gpt
+    steps:
+      - intent: ask_gpt
+      - action: action_ask_gpt
+      - intent: confirm
+      - action: action_set_gpt_confirmed
+
+  - story: GPT mode active
+    steps:
+      - slot_was_set:
+        - gpt_confirmed: True
+      - action: action_ask_gpt
