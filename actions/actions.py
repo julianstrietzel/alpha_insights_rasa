@@ -44,6 +44,17 @@ class ActionAskGPT(Action):
             return []
 
         await self.gpt_handler.execute_query(user_input, output_function=dispatcher.utter_message)
+        return [FollowupAction("action_set_gpt_confirmed")]
+
+
+class ActionOnceAskGPT(Action):
+    def name(self) -> Text:
+        return "action_ask_gpt_once"
+
+    async def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        user_input = tracker.latest_message.get('text')
+        patient_details = str(tracker.slots)
+        await GPTHandler(basic_information=patient_details).execute_query(user_input, output_function=dispatcher.utter_message, stream = False)
         return []
 
 
@@ -216,11 +227,11 @@ class ActionGetBloodPressureTrendsThreeMonths(Action):
                 "No blood pressure records found for the past three months for the provided user id.")
             return []
 
-        response = "Blood pressure trends for the past three months:\n"
+        response = "Blood pressure trends for the past three months:"
         prev = None
         for record in results:
             month, max_systolic, min_systolic, avg_systolic, max_diastolic, min_diastolic, avg_diastolic, max_pulse, min_pulse, avg_pulse, measurement_count = record
-            response += f"Month: {month.strftime('%B %Y')}\n"
+            response += f"\nMonth: {month.strftime('%B %Y')}\n"
             response += f"Measurements: {measurement_count}"
             if prev:
                 response += get_trend(prev["measurement_count"], measurement_count)

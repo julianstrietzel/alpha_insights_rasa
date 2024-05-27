@@ -41,6 +41,9 @@ responses:
     - text: "What is the user ID?"
     - text: "Can you tell me the user ID of the patient of concern?"
 
+  utter_inform_gpt_interaction:
+    - text: "We will use gpt to answer this question..."
+
 session_config:
   session_expiration_time: 60
   carry_over_slots_to_new_session: true
@@ -135,4 +138,5 @@ actions:
   - action_high_blood_pressure_readings
   - action_ask_gpt
   - action_set_gpt_confirmed
+  - action_ask_gpt_once
 

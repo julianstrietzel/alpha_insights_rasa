@@ -9,22 +9,14 @@ rules:
   - rule: If fallback ask for confirmation to use gpt
     steps:
       - intent: nlu_fallback
-      - action: action_ask_gpt
+      - action: utter_inform_gpt_interaction
+      - action: action_ask_gpt_once
 
   - rule: If ask_gpt ask for confirmation to use gpt
     steps:
       - intent: ask_gpt
-      - action: action_ask_gpt
-
-
-  - rule: gpt loop
-    condition:
-      - slot_was_set:
-        - gpt_confirmed: true
-    steps:
-      - action: action_ask_gpt
-
-
+      - action: utter_inform_gpt_interaction
+      - action: action_ask_gpt_once
 
   - rule: story_goodbye
     steps:

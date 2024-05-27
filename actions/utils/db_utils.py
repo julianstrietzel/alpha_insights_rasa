@@ -60,7 +60,7 @@ class DBHandler:
 
     def execute_query(self, query) -> [List[Tuple], str]:
         if not self.silent:
-            self.output_function("Executing query: ", query)
+            self.output_function("Executing query to database: ", query)
         try:
             self.cur.execute(query)
             results = self.cur.fetchall()
