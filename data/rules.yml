@@ -20,7 +20,7 @@ rules:
   - rule: gpt loop
     condition:
       - slot_was_set:
-        - gpt_confirmed: True
+        - gpt_confirmed: true
     steps:
       - action: action_ask_gpt
 

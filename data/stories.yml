@@ -14,9 +14,3 @@ stories:
       - action: action_ask_gpt
       - intent: confirm
       - action: action_set_gpt_confirmed
-
-  - story: GPT mode active
-    steps:
-      - slot_was_set:
-        - gpt_confirmed: True
-      - action: action_ask_gpt

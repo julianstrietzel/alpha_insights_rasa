@@ -67,8 +67,8 @@ slots:
 
   gpt_confirmed:
     type: bool
-    initial_value: False
-    influence_conversation: True
+    initial_value: false
+    influence_conversation: true
     mappings:
     - type: custom
 
