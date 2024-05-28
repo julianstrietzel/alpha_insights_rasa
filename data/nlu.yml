@@ -299,7 +299,7 @@ nlu:
     - compare blood pressure at home and elsewhere
     - What are the user's blood pressure readings when they are at home compared to other locations?
     - Show the user's blood pressure at home versus other places.
-    - How does the user's blood pressure compare at home and elsewhere?
+    - How does the user's blood pressure at home compare to elsewhere?
     - What is the user's blood pressure at home versus other locations?
     - Compare the user's blood pressure at home and other places.
     - What are the blood pressure readings for the user at home compared to other locations?
