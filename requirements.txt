@@ -1,2 +1,4 @@
 openai~=1.28.1
 rasa~=3.6.2
+streamlit
+requests
