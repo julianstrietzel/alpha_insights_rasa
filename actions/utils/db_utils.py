@@ -52,15 +52,19 @@ class DBHandler:
                     host="localhost",
                     database="insights",
                     user="insights",
-                    port="5432", )
+                    port="5432",
+                )
             except psycopg2.OperationalError as e:
-                raise ConnectionError("Please start the database for our client first!\nError message: " + str(e))
+                raise ConnectionError(
+                    "Please start the database for our client first!\nError message: "
+                    + str(e)
+                )
             DBHandler.cur = self.conn.cursor()
         self.silent = silent
 
     def execute_query(self, query) -> [List[Tuple], str]:
         if not self.silent:
-            self.output_function("Executing query to database: ", query)
+            self.output_function("Executing query to database: " + str(query))
         try:
             self.cur.execute(query)
             results = self.cur.fetchall()
@@ -95,7 +99,8 @@ class DBHandler:
             "SELECT * FROM information_schema.columns WHERE table_schema = 'public' AND table_name NOT IN "
             "('databasechangelog', 'jhi_user_authority', 'user_activity', 'jhi_user', 'jhi_user_authority', "
             "'databasechangeloglock', 'jhi_authority') "
-            "ORDER BY table_schema, table_name, ordinal_position")
+            "ORDER BY table_schema, table_name, ordinal_position"
+        )
         tables = self.cur.fetchall()
         tables_dict = []
         for table in tables:
@@ -104,7 +109,7 @@ class DBHandler:
                 "column_name": table[3],
                 "data_type": table[7],
                 "character_maximum_length": table[8],
-                "is_nullable": table[10]
+                "is_nullable": table[10],
             }
             tables_dict.append(table_dict)
         tables_new = dict()
@@ -124,12 +129,12 @@ class DBHandler:
         for table_name, columns in schema.items():
             markdown_output += f"## Table: {table_name}\n\n"
             for column in columns:
-                nullable = "not nullable" if column["is_nullable"] == "NO" else "nullable"
+                nullable = (
+                    "not nullable" if column["is_nullable"] == "NO" else "nullable"
+                )
                 details = f"{column['data_type']}"
                 if "character_maximum_length" in column:
                     details += f", max length: {column['character_maximum_length']}"
                 markdown_output += f"- **{column['column_name']}** ({details}, {nullable}): Description.\n"
             markdown_output += "\n"
         return markdown_output
-
-

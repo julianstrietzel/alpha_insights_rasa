@@ -24,7 +24,9 @@ def get_trend(prev, curr) -> str:
         return " (no change)"
 
 
-def is_critical(systolic, diastolic, pulse, systolic_span, diastolic_span, pulse_span=(60, 160)):
+def is_critical(
+    systolic, diastolic, pulse, systolic_span, diastolic_span, pulse_span=(60, 160)
+):
     if systolic > systolic_span[1] or systolic < systolic_span[0]:
         return True
     if diastolic > diastolic_span[1] or diastolic < diastolic_span[0]:
@@ -34,7 +36,7 @@ def is_critical(systolic, diastolic, pulse, systolic_span, diastolic_span, pulse
     return False
 
 
-def get_bloodpressure(user_id, limit=100, interval = "3 MONTHS") -> List:
+def get_bloodpressure(user_id, limit=100, interval="3 MONTHS") -> List:
     query = f"""
     SELECT recorded_at, systolic, diastolic, pulse
     FROM bloodpressure
@@ -51,7 +53,7 @@ def get_bloodpressure(user_id, limit=100, interval = "3 MONTHS") -> List:
     return results
 
 
-def check_most_recent_geofence(timestamp:str, user_id:str):
+def check_most_recent_geofence(timestamp: str, user_id: str):
     query = f"""
     SELECT geo_fence_status
     FROM geo_location
@@ -70,13 +72,18 @@ def get_days_ago(date):
     if date is None:
         return None
     if isinstance(date, str):
-        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
+        date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f")
     return (datetime.now() - date).days
 
 
-def get_blood_pressure_spans(tracker, user_id) -> Tuple[Tuple[int, int], Tuple[int, int], str]:
-    birthday = datetime.strptime(tracker.get_slot("birthday"), "%Y-%m-%d") if tracker.get_slot(
-        "birthday") is not None else None
+def get_blood_pressure_spans(
+    tracker, user_id
+) -> Tuple[Tuple[int, int], Tuple[int, int], str]:
+    birthday = (
+        datetime.strptime(tracker.get_slot("birthday"), "%Y-%m-%d")
+        if tracker.get_slot("birthday") is not None
+        else None
+    )
     if not birthday:
         query = f"""SELECT birthday FROM patient WHERE user_id = {user_id};"""
         result = DBHandler().execute_query(query)[0]
