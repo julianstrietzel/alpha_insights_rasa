@@ -36,7 +36,8 @@ database_schema = """# Database Schema
 - sex (character varying, max length: 255, nullable): gender.
 - home_longitude (real, max length: None, nullable): Longitude of home.
 - home_latitude (real, max length: None, nullable): Latitude of home.
-"""
+
+To compare timestamps use: CAST(recorded_at AS timestamp)"""
 
 
 class DBHandler:
@@ -73,22 +74,22 @@ class DBHandler:
             return results
         except psycopg2.OperationalError as e:
             self.conn.rollback()
-            print("Operational error: " + str(e))
+            return "Operational error: " + str(e)
         except psycopg2.ProgrammingError as e:
             self.conn.rollback()
-            print("Programming error: " + str(e))
+            return "Programming error: " + str(e)
         except psycopg2.IntegrityError as e:
             self.conn.rollback()
-            print("Integrity error: " + str(e))
+            return "Integrity error: " + str(e)
         except psycopg2.DataError as e:
             self.conn.rollback()
-            print("Data error: " + str(e))
+            return "Data error: " + str(e)
         except psycopg2.InternalError as e:
             self.conn.rollback()
-            print("Internal error: " + str(e))
+            return "Internal error: " + str(e)
         except psycopg2.InFailedSqlTransaction as e:
             self.conn.rollback()
-            print("Transaction failed and was rolled back: ", e)
+            return "Transaction failed and was rolled back: " + str(e)
         return None
 
     def close(self):

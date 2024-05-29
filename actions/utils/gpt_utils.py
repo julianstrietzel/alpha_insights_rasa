@@ -3,14 +3,13 @@ import json
 from openai import OpenAI
 from openai.lib.streaming import AssistantEventHandler
 
-from actions.utils.db_utils import DBHandler
+from actions.utils.db_utils import DBHandler, database_schema
 
 
 class GPTHandler:
 
     def __init__(self, basic_information: str = ""):
         # TODO if handed over a thread id this should not create but get the thread to continue even if multiple sessions are up
-        db_schema = DBHandler.generate_markdown(DBHandler().get_table_schema())
         self.client = OpenAI(
             api_key="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"
         )
@@ -26,7 +25,8 @@ Everytime you run into problems, please just try your best and different approac
 # Database Schema
 
 """
-            + db_schema
+            + database_schema
+            + "\nConsider information only related to the following user: "
             + basic_information,
             model="gpt-4o",
             tools=[
