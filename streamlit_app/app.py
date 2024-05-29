@@ -21,17 +21,57 @@ st.write("Talk to the bot by typing your message and hitting enter.")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for msg in st.session_state.messages:
-    st.write(f"{msg['sender']}: {msg['message']}")
-
-user_message = st.text_input("You: ", "")
-
-if st.button("Send"):
+def send_message():
+    user_message = st.session_state.user_message
     if user_message:
         st.session_state.messages.append({"sender": "You", "message": user_message})
-
         responses = get_bot_response(user_message)
         for response in responses:
-            st.session_state.messages.append({"sender": "Bot", "message": response.get("text", "")})
-        
-        st.experimental_rerun()
+            st.session_state.messages.append({"sender": "Bot", "message": response.get("text", "").replace('\n', '<br>')})
+        st.session_state.user_message = ""
+
+st.markdown("""
+    <style>
+    .chat-bubble {
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px;
+        width: fit-content;
+        max-width: 70%;
+        color: black;
+    }
+    .user-bubble {
+        background-color: #DCF8C6;
+        align-self: flex-end;
+    }
+    .bot-bubble {
+        background-color: #F1F0F0;
+        align-self: flex-start;
+    }
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+for msg in st.session_state.messages:
+    if msg['sender'] == "You":
+        st.markdown(
+            '<div class="chat-container"><div class="chat-bubble user-bubble">{}</div></div>'.format(
+                msg["message"].replace("\n", "<br>")
+            ),
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<div class="chat-container"><div class="chat-bubble bot-bubble"><pre>{}</pre></div></div>'.format(
+                msg["message"].replace("\n", "<br>")
+            ),
+            unsafe_allow_html=True,
+        )
+
+st.text_input("You: ", key="user_message", on_change=send_message)
+
+if st.session_state.user_message:
+    send_message()
