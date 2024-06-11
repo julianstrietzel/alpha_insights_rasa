@@ -1,39 +1,27 @@
 version: "3.1"
 
 intents:
-  - greet
-  - goodbye
-  - confirm
-  - bot_challenge
-  - blood_pressure_last_recorded
-  - user_nickname
-  - provide_user_id
-  - basic_user_details
-  - blood_pressure_trends_three_months
-  - blood_pressure_time_of_day
-  - critical_blood_pressure_alerts
-  - location_specific_blood_pressure
-  - blood_pressure_home_vs_other
-  - user_medical_preconditions
-  - blood_pressure_trend_changed_since_date
-  - high_blood_pressure_readings
-  - ask_gpt
+  - einleitung_bot_herausforderung
+  - grund_info
+  - aktueller_bd_status
+  - erweiterter_bd_status
+  - ablesungen_ausserhalb_zielbereich
+  - details_ausreisser
+  - wendepunkte
+  - trendanderungen_medikation
+  - trends
+  - veraenderungen_ueber_tag
+  - benutzer_id_bereitstellen # Currently not used!
 
 
 responses:
-  utter_greet:
-    - condition:
-        - type: slot
-          name: user_id
-          value: "-1"
-      text: "Hey! Please provide the user ID of your patient."
-    - text: "Hey! I am a health assistant. How can I help you today?"
-
-  utter_goodbye:
-    - text: "Bye"
-
   utter_bot_challenge:
-    - text: "I am a bot. I can help you to get deeper insights into the user data provided. What do you want me to look into?"
+    - text: "Dieser ChatBot wurde entwickelt, um eine Vielzahl von Anfragen im Zusammenhang mit den Blutdruckwerten des Patienten zu beantworten. Er verwendet verfügbare Blutdruckdaten, um auf bestimmte Fragen zu den neuesten Messwerten des Patienten, Messwerten über einen bestimmten Zeitraum, Schwankungen und Trends seit Änderungen der Medikation und mehr zu reagieren. Er kann detaillierte Analysen und Visualisierungen liefern, die zu einem umfassenderen Verständnis der Gesundheit des Patienten beitragen.
+    Bitte fahren Sie fort, indem Sie Ihre Frage stellen.
+    Mögliche Fragen sind u.a.:
+    'Welche waren meine höchsten und niedrigsten Messwerte im letzten Monat?'
+    'Können Sie mehr Details zu den Messungen über dem Zielbereich liefern?'
+    'Hat sich der Blutdruck des Benutzers seit dem 12. Dezember verändert?'"
 
 
   utter_ask_user_id:
@@ -53,90 +41,83 @@ entities:
   - type
   - direction
   - limit
-  - date
-  - location
+  - change_date # date of change in medication
   - timespan
-  - number
 
 slots:
+  type:
+    type: text
+  direction:
+    type: text
+  limit:
+    type: text
+  change_date:
+    type: text
+  timespan:
+    type: text
   user_id:
     type: text
-    initial_value: "-1"
+    initial_value: "25601"
     mappings:
-    - type: from_entity
-      entity: user_id
-      intent: provide_user_id
-    - type: custom
-
-  gpt_confirmed:
-    type: bool
-    initial_value: false
-    influence_conversation: true
-    mappings:
-    - type: custom
-
+      - type: from_entity
+        entity: user_id
+        intent: provide_user_id
+      - type: custom
   nickname:
-      type: text
-      mappings:
-        - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
   title:
-      type: text
-      mappings:
-        - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
   geo:
-      type: text
-      mappings:
-        - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
   health:
-      type: text
-      mappings:
-        - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
   home_longitude:
-      type: text
-      mappings:
-        - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
   home_latitude:
-      type: text
-      mappings:
-        - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
   birthday:
-      type: text
-      mappings:
-        - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
   sex:
-      type: text
-      mappings:
-        - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
   medical_preconditions:
-      type: text
-      mappings:
-        - type: custom
-  change_date:
-        type: text
-        mappings:
-            - type: from_entity
-              entity: date
-              intent: blood_pressure_trend_changed_since_date
-            - type: custom
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
 
 actions:
-  - utter_greet
-  - utter_goodbye
-  - utter_ask_user_id
-  - action_respond_to_greeting
-  - action_get_most_recent_blood_pressure
-  - action_get_basic_user_details
-  - action_get_user_nickname
-  - action_get_blood_pressure_trends_three_months
-  - action_check_high_systolic_readings
-  - action_check_blood_pressure_time_of_day
-  - action_critical_blood_pressure_alerts
-  - action_get_location_specific_blood_pressure
-  - action_blood_pressure_home_vs_other
-  - action_get_user_medical_preconditions
-  - action_blood_pressure_trend_changed_since_date
-  - action_high_blood_pressure_readings
-  - action_ask_gpt
-  - action_set_gpt_confirmed
-  - action_ask_gpt_once
+  - action_grund_info
+  - action_aktueller_bd_status
+  - action_erweiterter_bd_status
+  - action_ablesungen_ausserhalb_zielbereich
+  - action_details_ausreisser
+  - action_wendepunkte
+  - action_trendanderungen_medikation
+  - action_trends
+  - action_veraenderungen_ueber_tag
 

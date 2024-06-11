@@ -1,90 +1,45 @@
 version: "3.1"
 
 rules:
-  - rule: If greeted ask for user id if not provided
-    steps:
-      - intent: greet
-      - action: action_respond_to_greeting
-
-  - rule: If fallback ask for confirmation to use gpt
-    steps:
-      - intent: nlu_fallback
-      - action: utter_inform_gpt_interaction
-      - action: action_ask_gpt_once
-
-  - rule: If ask_gpt ask for confirmation to use gpt
-    steps:
-      - intent: ask_gpt
-      - action: utter_inform_gpt_interaction
-      - action: action_ask_gpt_once
-
-  - rule: story_goodbye
-    steps:
-      - intent: goodbye
-      - action: utter_goodbye
-
   - rule: Bot challenge
     steps:
-      - intent: bot_challenge
+      - intent: einleitung_bot_herausforderung
       - action: utter_bot_challenge
-
   - rule: basic_user_details
     steps:
-      - intent: basic_user_details
-      - action: action_get_basic_user_details
-
-  - rule: user_id_provided
+      - intent: grund_info
+      - action: action_grund_info
+  - rule: get current bp status
     steps:
-      - intent: provide_user_id
-      - action: action_get_basic_user_details
-
-  - rule: get_bloodpressure
+      - intent: aktueller_blutdruck_status
+      - action: action_aktueller_bd_status
+  - rule: get more details about current bp if user asks
     steps:
-      - intent: blood_pressure_last_recorded
-      - action: action_get_most_recent_blood_pressure
-
-  - rule: get_username
+      - intent: erweiterter_bd_status
+      - action: action_erweiterter_bd_status
+  - rule: get bp readings outside target range
     steps:
-      - intent: user_nickname
-      - action: action_get_user_nickname
-
-  - rule: get_blood_pressure_trends
+      - intent: ablesungen_ausserhalb_zielbereich
+      - action: action_ablesungen_ausserhalb_zielbereich
+  - rule: get details about outliers
     steps:
-      - intent: blood_pressure_trends_three_months
-      - action: action_get_blood_pressure_trends_three_months
-
-  - rule: story_high_blood_pressure_readings
+      - intent: details_ausreisser
+      - action: action_details_ausreisser
+  - rule: get turning points
     steps:
-      - intent: high_blood_pressure_readings
-      - action: action_high_blood_pressure_readings
-
-  - rule: check_blood_pressure_time_of_day
+      - intent: wendepunkte
+      - action: action_wendepunkte
+  - rule: get trend changes due to medication
     steps:
-      - intent: blood_pressure_time_of_day
-      - action: action_check_blood_pressure_time_of_day
-
-  - rule: critical_blood_pressure_alert
+      - intent: trendanderungen_medikation
+      - action: action_trendanderungen_medikation
+  - rule: get trends more generally over the recent time spans
     steps:
-      - intent: critical_blood_pressure_alerts
-      - action: action_critical_blood_pressure_alerts
-
-  - rule: get_location_specific_blood_pressure
+      - intent: trends
+      - action: action_trends
+  - rule: get changes over the day e.g. compare morning and evening
     steps:
-      - intent: location_specific_blood_pressure
-      - action: action_get_location_specific_blood_pressure
+      - intent: veraenderungen_ueber_tag
+      - action: action_veraenderungen_ueber_tag
 
-  - rule: compare_blood_pressure_home_vs_other
-    steps:
-      - intent: blood_pressure_home_vs_other
-      - action: action_blood_pressure_home_vs_other
-
-  - rule: get_user_medical_preconditions
-    steps:
-      - intent: user_medical_preconditions
-      - action: action_get_user_medical_preconditions
-
-  - rule: blood_pressure_trend_changed_since_date
-    steps:
-      - intent: blood_pressure_trend_changed_since_date
-      - action: action_blood_pressure_trend_changed_since_date
 

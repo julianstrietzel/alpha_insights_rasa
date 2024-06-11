@@ -1,353 +1,238 @@
 version: "3.1"
 
 nlu:
-  - intent: greet
+  - synonym: systolisch
     examples: |
-      - hey
-      - hello
-      - hi
-      - hello there
-      - good morning
-      - good evening
-      - moin
-      - hey there
-      - let's go
-      - hey dude
-      - goodmorning
-      - goodevening
-      - good afternoon
+      - systolisch
+      - systolischer
+      - systolische
+      - systol
+      - oberer Wert
+      - oberer Blutdruck
+      - obere Messung
 
-  - intent: provide_user_id
+  - synonym: diastolisch
     examples: |
-      - The user ID is [1900413](user_id)
-      - The patient ID is [10](user_id)
-      - I am concerned about user [20078](user_id)
-      - We are looking into user [10435](user_id)
-      - The user ID is [76](user_id)
-      - user id: [1900413](user_id)
-      - user id: [10](user_id)
-      - patient id: [20078](user_id)
+      - diastolisch
+      - diastolischer
+      - diastolische
+      - diast
+      - unterer Wert
+      - unterer Blutdruck
+      - untere Messung
+
+  - synonym: puls
+    examples: |
+      - Puls
+      - Pulsrate
+      - Herzfrequenz
+      - Herzschlag
+      - Herzrate
+      - Pulsfrequenz
+      - Herzrhythmus
+      - Herztempo
+
+  - synonym: über
+    examples: |
+      - über
+      - oberhalb
+      - höher
+      - mehr als
+      - über dem Zielbereich
+      - oberhalb des Zielbereichs
+      - über der Grenze
+      - über dem Grenzwert
+
+  - synonym: unter
+    examples: |
+      - unter
+      - niedriger
+      - weniger als
+      - weniger
+      - unter dem Zielbereich
+      - unterhalb des Zielbereichs
+      - unter der Grenze
+      - unter dem Grenzwert
+
+  - synonym: Jahr
+    examples: |
+      - Jahren
+      - Jahre
+      - Jahres
+      - vergangenes Jahr
+      - letztes Jahr
+      - Jahr
+      - Jahre hinweg
+
+  - synonym: Monat
+    examples: |
+      - Monat
+      - Monaten
+      - Monate
+      - letzter Monat
+      - vergangener Monat
+      - letzten Monat
+      - in den letzten Monaten
+
+  - synonym: Woche
+    examples: |
+      - Woche
+      - Wochen
+      - Wochentage
+      - letzte Woche
+      - vergangene Woche
+      - letzten Wochen
+      - in den letzten Wochen
+
+  - synonym: Tag
+    examples: |
+      - Tag
+      - Tage
+      - Tagen
+      - täglicher Verlauf
+      - täglich
+      - jeden Tag
+      - letzten Tage
+      - in den letzten Tagen
+
+  - intent: benutzer_id_bereitstellen
+    examples: |
+      - Die Benutzer-ID ist [1900413](user_id)
+      - Die Patienten-ID ist [10](user_id)
+      - Ich mache mir Sorgen um den Benutzer [20078](user_id)
+      - Wir schauen uns den Benutzer [10435](user_id) an
+      - Die Benutzer-ID ist [76](user_id)
+      - Benutzer-ID: [1900413](user_id)
+      - Benutzer-ID: [10](user_id)
+      - Patienten-ID: [20078](user_id)
       - [1900413](user_id)
-      - user id [10](user_id)
-      - user [2](user_id)
+      - Benutzer-ID [10](user_id)
+      - Benutzer [2](user_id)
       - [2](user_id)
+      - Ich möchte die Daten für Benutzer [12345](user_id) abrufen
+      - Die ID des Benutzers ist [5678](user_id)
+      - Für die ID [9876](user_id), bitte
 
-  - intent: confirm
+  - intent: einleitung_bot_herausforderung
     examples: |
-      - yes
-      - yes sure
-      - of course
-      - definitely
-      - please do so
-      - yeah
-      - confirm
-      - yes please
-      - sure
-      - yes please
-      - yes, please
-      - yes, I would
-      - yes, I would like that
-      - yes, I would like to know
-      - sure
-      - I would like that
-      - I would like to know
-      - I would like that
-      - lets see
-      - I want to know that
-      - I want to know that please
-      - I want to know please
+      - bist du ein Bot?
+      - bist du ein Mensch?
+      - spreche ich mit einem Bot?
+      - spreche ich mit einem Menschen?
+      - Bot?
+      - bist du eine echte Person?
+      - du bist ein Bot?
+      - du bist ein Mensch?
+      - Mensch?
+      - kann ich mit einer echten Person sprechen?
+      - Sind Sie ein Bot?
+      - Reden ich mit einem Menschen oder Bot?
+      - Bist du ein Roboter?
+      - Reden ich mit einer Maschine?
+      - Du bist kein echter Mensch, oder?
 
-  - intent: bot_challenge
+  - intent: grund_info
     examples: |
-      - are you a bot?
-      - are you a human?
-      - am I speaking to a bot?
-      - am I speaking to a human?
-      - bot?
-      - are you a real person?
-      - you're a bot?
-      - you're a human?
-      - human?
-      - can i speak to a real person?
+      - Patienteninformation
+      - Grundlegende Details
+      - Wer ist der Patient?
+      - Über wen sprechen wir?
+      - Grundlegende Informationen über den Patienten
+      - Erzähl mir etwas über den Patienten
+      - Geben Sie mir die Basisdaten des Patienten
+      - Wer ist diese Person?
+      - Kann ich die Patienteninformationen bekommen?
 
-
-  - intent: goodbye
+  - intent: aktueller_bd_status
     examples: |
-      - cu
-      - good by
-      - cee you later
-      - good night
-      - bye
-      - goodbye
-      - have a nice day
-      - see you around
-      - bye bye
-      - see you later
+      - Aktueller Blutdruck
+      - Was ist die neueste Blutdruckmessung?
+      - Wie ist der aktuelle Blutdruck?
+      - Was ist der letzte Blutdruckwert?
+      - Kannst du mir den neuesten Blutdruckwert geben?
+      - Zeige mir die neueste Blutdruckmessung
+      - Was ist mein aktueller Blutdruck?
+      - Wie hoch ist mein Blutdruck jetzt?
+      - Was ist mein letzter Blutdruck?
+      - Aktuelle Blutdruckwerte, bitte
 
-
-  - intent: blood_pressure_last_recorded
+  - intent: erweiterter_bd_status
     examples: |
-      - last blood pressure reading
-      - blood pressure reading
-      - most recent blood pressure
-      - blood pressure
-      - bloodpressure
-      - When was my last blood pressure reading taken?
-      - What is my last blood pressure check?
-      - Can you tell me the last blood pressure measurement?
-      - When did I last measure my blood pressure?
-      - What's the latest blood pressure measurement?
+      - Wie haben sich die Blutdruckmessungen in der letzten [Woche](timespan) verhalten?
+      - Wie war der Blutdruck seit dem [25.12.2023](change_date)?
+      - Höchste und niedrigste Messwerte im letzten [Monat](timespan)?
+      - Wie verhält sich der Blutdruck des Patienten?
+      - BP [Wochen](timespan)verlauf
+      - Blutdruckverlauf in den letzten [Tagen](timespan)
+      - Was war mein Blutdruck im letzten [Monat](timespan)?
+      - Welche waren meine höchsten und niedrigsten Werte im letzten [Monat](timespan)?
+      - Wie war mein Blutdruck in der letzten [Woche](timespan)?
+      - Blutdruck seit dem [25.12.2023](change_date)
 
-
-  - intent: user_nickname
+  - intent: ablesungen_ausserhalb_zielbereich
     examples: |
-      - name
-      - called how?
-      - name of the patient
-      - how is the patient called
-      - What is the nickname of the patient?
-      - Can you tell me the nickname of the patient?
-      - What's the name of the patient?
-      - Show me the nickname of the patient?
-      - What name does the patient have?
-      - What is the name of the patient?
-      - Can you tell me the name of the patient?
-      - What's the name of the user?
+      - Hat der Benutzer in den letzten [Monat](timespan) Ablesungen des [systolischen](type) Blutdrucks [höher](direction) als [130](limit) mmHg gehabt?
+      - Können Sie mehr Details zu den Messungen über dem Zielbereich liefern?
+      - Könnten Sie die [systolischen](type) Messwerte hervorheben, die [über](direction) dem Zielbereich lagen?
+      - Können Sie mehr Informationen zu den [diastolischen](type) Blutdruckmessungen liefern, die den Zielbereich [unterschritten](direction) haben?
+      - Gab es bestimmte Muster oder Faktoren, die mit den [erhöhten](direction) [systolischen](type) Blutdruckmessungen in Verbindung standen?
+      - Gab es [diastolische](type) Messungen, die [unter](direction) dem Zielbereich lagen?
+      - Wie viele [systolische](type) Messungen waren [oberhalb](direction) dem Zielbereich?
+      - Wie viele [diastolische](type) Messungen waren [niedriger](direction) als der Zielbereich?
+      - Gab es [systolische](type) Messungen, die [unter](direction) dem Korridor lagen?
+      - Gab es [diastolische](type) Messungen, die [über](direction) dem Zielbereich lagen?
+      - Waren die Blutdruckmessungen in den letzten [Monaten](timespan) außerhalb des Ziels?
+      - Haben die Blutdruckwerte in letzter Zeit den Zielbereich überschritten?
+      - Gab es hohe systolische Messungen im letzten [Monat](timespan)?
 
-  - intent: basic_user_details
+  - intent: details_ausreisser
     examples: |
-      - user details
-      - basic information
-      - patient details
-      - details
-      - basic info
-      - information
-      - What is the basic information of the patient?
-      - Can you tell me the basic information of the patient?
-      - What's the basic information for the patient?
-      - Show me the basic information of the patient?
-      - What basic information does the patient have?
-      - What is the basic information of the user?
-      - Can you tell me the basic information of the user?
+      - Ausreißer in den Blutdruckmessungen im letzten [Monat](timespan)
+      - Gab es in der vergangenen [Woche](timespan) ungewöhnliche [diastolische](type) Blutdruckmessungen?
+      - Können Sie Ausreißer in den Messwerten des letzten [Jahres](timespan) identifizieren?
+      - Kannst du Ausreißer in den [systolischen](type) Messungen feststellen?
+      - Gab es in den letzten drei [Monaten](timespan) signifikante Abweichungen in den [diastolischen](type) Blutdruckmessungen?
+      - Gab es in den letzten drei [Wochen](timespan) signifikante Abweichungen in den [systolischen](type) Blutdruckmessungen?
+      - Bitte hebe ungewöhnlich hohe oder niedrige Blutdruckmessungen in den letzten sechs [Monaten](timespan) hervor
+      - Ungewöhnliche Messungen in den letzten [Tagen](timespan)
+      - Gab es extreme Messungen in den letzten [Wochen](timespan)?
+      - Haben Sie außergewöhnliche Blutdruckwerte festgestellt?
+      - Gab es im letzten [Monat](timespan) ungewöhnliche Blutdruckwerte?
 
-
-  - intent: blood_pressure_trends_three_months
+  - intent: wendepunkte
     examples: |
-      - Trends in the blood pressure
-      - changes in blood pressure
-      - blood pressure trends
-      - What is the average systolic and diastolic blood pressure of the user over the past months?
-      - Can you show me the user's blood pressure trends?
-      - What are the blood pressure trends for the user in the last 90 days?
-      - How has the user's blood pressure changed in the past month?
-      - Show me the user's average blood pressure over the last month.
-      - What's the user's average systolic and diastolic pressure for the past month?
-      - Provide the blood pressure trends for the user over the last 90 days.
-      - Display the user's blood pressure trends for the past three months.
-      - How did the user's blood pressure trend in the past months?
-      - Can I see the user's blood pressure trends over the last three months?
+      - Können Sie die Wendepunkte im Trend des Pulsdrucks herausstellen?
+      - Gibt es irgendwelche Inflektionspunkte in den letzten [Monaten](timespan)?
+      - Was waren die wichtigsten Trends und Schwankungen im Blutdruck des Patienten in den letzten sechs [Monaten](timespan)?
+      - Können Sie signifikante Trendänderungen im systolischen Blutdruck des Patienten im letzten [Jahr](timespan) hervorheben?
+      - Gab es bemerkenswerte Wendepunkte in den [diastolischen](type) Blutdruckmessungen in letzter [Zeit](timespan)?
+      - Welche Veränderungen können in den Trends des Blutdrucks der letzten drei [Monaten](timespan) festgestellt werden?
+      - Signifikante Veränderungen im Trend der Pulsrate des Patienten im letzten [Monat](timespan)?
+      - Signifikante Trendwenden in den letzten [Wochen](timespan)?
+      - Veränderungen im Blutdrucktrend in den letzten [Monaten](timespan)
+      - Wichtige Wendepunkte im Blutdruckverlauf
+      - Gibt es Wendepunkte im Trend des Pulsdrucks?
+      - Was sind die Inflektionspunkte im Blutdrucktrend?
 
-  - intent: high_blood_pressure_readings
+  - intent: trendaenderungen_medikation
     examples: |
-      - Any [high](direction) blood pressure readings?
-      - Extreme blood pressure recent [weeks](timespan)
-      - [high](direction) blood pressure reading?  
-      - Special blood pressure readings
-      - Anything special about the blood pressure?
-      - Unusual blood pressure readings
-      - Has the user had any readings of [systolic](type) blood pressure [higher](direction) than [130](limit) mmHg in the last [month](timespan)?
-      - Did the user have any [high](direction) [systolic](type) blood pressure readings recently?
-      - Show me if the user's [systolic](type) pressure exceeded [130](limit) mmHg in the last [months](timespan).
-      - Were there any instances of high [systolic](type) blood pressure for the user the last [days](timespan)?
-      - Has the user recorded any [systolic](type) blood pressure [above](direction) [130](limit) mmHg in the past [days](timespan)?
-      - Has the user recorded any [diastolic](type) blood pressure [below](direction) [100](limit) mmHg in the past [months](timespan)?
-      - Did the user have [diastolic](type) readings over [130](limit) mmHg recently?
-      - Were there [high](direction) [systolic](type) blood pressure readings in the last [week](timespan) for the user?
-      - Has the user's [systolic](type) pressure been [lower](direction) than [90](limit) mmHg in the past [month](timespan)?
-      - Any [diastolic](type) blood pressure readings below [80](limit) for the user this [week](timespan)?
-  # TODO add entities for 3 months vs. 2 weeks etc...
-  - synonym: systolic
+      - Hat sich der [systolische](type) Blutdruck des Benutzers seit dem [12. Dez](change_date) verändert?
+      - Können Sie eine detaillierte Analyse der Blutdrucktrends des Patienten um den Medikamentenwechsel herum liefern?
+      - Welche Schwankungen wurden in den [diastolischen](type) Blutdruckmessungen des Patienten seit der Medikamentenumstellung beobachtet?
+      - Signifikante Veränderungen im Blutdruck des Patienten seit Beginn des neuen Medikationsplans am [25.11.2023](change_date)
+      - Wir haben die Medikation am [15. März](change_date) geändert, welchen Einfluss hatte das auf die Blutdruckmessungen?
+      - Vergleiche die Blutdruckwerte vor und nach dem [12. Juni](change_date)
+      - Veränderungen im Blutdruck um den [6. Dezember](change_date)
+      - Auswirkungen des Medikamentenwechsels auf den Blutdruck
+      - Veränderungen des Blutdrucks seit der neuen Medikation
+      - Hat sich der Blutdruck seit dem Medikamentenwechsel verändert?
+      - Gab es Änderungen im Blutdruck nach dem Wechsel der Medikation?
+
+  - intent: trends
     examples: |
-      - Systolic
-      - Sistolic
-      - Systolic pressure
-      - sys
-
-  - synonym: diastolic
-    examples: |
-      - Diastolic
-      - Diastolic pressure
-      - Diastol
-      - dia
-  - synonym: higher
-    examples: |
-      - higher
-      - above
-      - over
-      - more than
-  - synonym: lower
-    examples: |
-      - lower
-      - below
-      - under
-      - less than
-
-  - synonym: month
-    examples: |
-      - month
-      - months
-      - Months
-      - month's
-      - monthes
-      - week
-      - weeks
-      - Weeks
-      - week's
-      - weekes
-
-  - synonym: day
-    examples: |
-      - day
-      - days
-      - Days
-      - day's
-      - dayes
-
-
-
-  - intent: blood_pressure_time_of_day
-    examples: |
-      - when is the blood pressure the highest?
-      - blood pressure in the morning and evening
-      - Are there specific times of day when the user's blood pressure tends to be higher?
-      - When is the user's blood pressure typically higher?
-      - Show the user's blood pressure variations by time of day.
-      - Is the blood pressure for the user higher in the morning?
-      - Are there certain times of day with higher blood pressure readings for the user?
-      - How does the user's blood pressure vary throughout the day?
-      - What times of day does the user's blood pressure increase?
-      - Show me the user's blood pressure trends by time of day.
-      - Does the user's blood pressure change at different times of the day?
-      - Are there higher blood pressure readings for the user at specific times?
-      - What times of day show higher blood pressure for the user?
-
-  - intent: critical_blood_pressure_alerts
-    examples: |
-      - critical blood pressure readings
-      - any extreme blood pressure values?
-      - highest blood pressure readings?
-      - Has the user had any critical blood pressure readings recently, and where were they at the time?
-      - Did the user have any critical blood pressure incidents recently?
-      - Was there any critical blood pressure events for the user lately?
-      - Show me if the user had critical blood pressure readings and their locations.
-      - Were there any critical blood pressure events for the user lately?
-      - Has the user recorded any critical blood pressure readings recently?
-      - Where was the user during critical blood pressure readings?
-      - Any recent critical blood pressure readings for the user and locations?
-      - Were there critical blood pressure readings for the user and where?
-      - Where was the user when they had critical blood pressure readings?
-
-  - intent: location_specific_blood_pressure
-    examples: |
-      - location specific blood pressure
-      - blood pressure at different locations
-      - blood pressure [at home](location)
-      - blood pressure [outside](location)
-      - blood pressure [within the geofence](location)
-      - When was the last time the user recorded their blood pressure [outside](location) the geofence, and what were the readings?
-      - Show me the user's blood pressure readings when they were [outside](location) the geofence.
-      - What were the user's blood pressure readings [outside](location) the geofence?
-      - When did the user last record blood pressure [outside](location) the geofence?
-      - What were the user's blood pressure readings [inside](location) the geofence?
-      - When did the user last record blood pressure [inside](location) the geofence?
-      - Provide the user's blood pressure readings [inside](location) the geofence.
-      - What was the user's blood pressure the last time they were [inside](location) the geofence?
-      - Show the user's blood pressure readings for [inside](location) geofence locations.
-      - When was the user's last blood pressure reading [inside](location) the geofence?
-      - What were the user's blood pressure levels [inside](location) the geofence?
-      - When did the user last have blood pressure readings [inside](location) the geofence?
-
-  - synonym: inside
-    examples: |
-      - inside
-      - indoors
-      - insid
-      - in
-      - within
-      - at home
-      - home
-      - IN
-      - within the geofence
-      - in the geofence 
-
-  - synonym: outside
-    examples: |
-      - outside
-      - outdoors
-      - beyond
-      - not at home
-      - not home
-      - outside the geofence
-      - not in the geofence
-
-
-  - intent: blood_pressure_home_vs_other
-    examples: |
-      - blood pressure at home versus elsewhere
-      - blood pressure at home compared to other locations
-      - measurements at home versus other places 
-      - outside compares to insights
-      - compare blood pressure at home and elsewhere
-      - What are the user's blood pressure readings when they are at home compared to other locations?
-      - Show the user's blood pressure at home versus other places.
-      - How does the user's blood pressure at home compare to elsewhere?
-      - What is the user's blood pressure at home versus other locations?
-      - Compare the user's blood pressure at home and other places.
-      - What are the blood pressure readings for the user at home compared to other locations?
-      - Show me the user's blood pressure at home versus other locations.
-      - How does the user's blood pressure vary at home and other places?
-      - What is the user's blood pressure at home compared to elsewhere?
-      - Provide the user's blood pressure readings at home and other locations.
-
-  - intent: user_medical_preconditions
-    examples: |
-      - preconditions
-      - health conditions
-      - medical conditions
-      - medical background knowledge
-      - Does the user have any medical preconditions that could affect their blood pressure readings?
-      - What medical preconditions does the user have that might impact blood pressure?
-      - Show me the user's medical preconditions related to blood pressure.
-      - Are there any medical conditions the user has affecting their blood pressure?
-      - What are the user's pre-existing conditions that affect blood pressure?
-      - Does the user have conditions that influence blood pressure readings?
-      - What medical preconditions of the user could impact their blood pressure?
-      - Are there any health conditions the user has related to blood pressure?
-      - Show the user's medical preconditions affecting blood pressure.
-      - What are the user's health conditions that impact blood pressure readings?
-
-  - intent: blood_pressure_trend_changed_since_date
-    examples: |
-      - Has the user's blood pressure changed since [December 12th](date)?
-      - Show me if the user's blood pressure has changed since [01.12.2023](date).
-      - How has the user's blood pressure changed since [January 1st](date)?
-      - Are there differences in the user's blood pressure since [2024](date)?
-      - What changes have occurred in the user's blood pressure since [January 1st](date)?
-      - Has the user's blood pressure varied since [February 2nd](date)?
-      - Show me the user's blood pressure changes since [03/10/2024](date).
-      - How does the user's blood pressure differ since [2024-12-01](date)?
-      - Are there any changes in the user's blood pressure since [2023-02-13](date)?
-      - What is the user's blood pressure like since [2023-12-24](date)?
-
-  - intent: ask_gpt
-    examples: |
-      - Let me talk to gpt
-      - give me llm 
-      - use gpt 4
-      - ask gpt whether there was something special in the data
-      - ask gpt about the user's blood pressure
-      - ask gpt about the user's medical preconditions
-      - ask gpt about the user's blood pressure trends
-      - ask gpt  ask gpt  We changed the medicine of the user 1 month ago. Could you compare the blood pressure values before and after?
-    
-
+      - Geben Sie die Blutdrucktrends für den Benutzer in den letzten [Monaten](timespan) an
+      - Welche Trends sind im Blutdruck des Nutzers zu erkennen?
+      - Blutdrucktrends über [Wochen](timespan)
+      - Wie hat sich der Blutdruck über die zurückliegenden [Jahre](timespan) verändert?
+      - Veränderungen im Blutdruck [systolisch](type)
+      - Veränderungen im [diastolischen](type) Blutdruck 
