@@ -704,9 +704,7 @@ class ActionGetLocationSpecificBloodPressure(Action):
                 "OUT",
             ],
         }
-        location = next(
-            tracker.get_latest_entity_values("location"),
-        )
+        location = next(tracker.get_latest_entity_values("location"), "inside")
         print("valid values" + str(valid_geostati[location]))
         results = [
             record

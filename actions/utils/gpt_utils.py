@@ -27,7 +27,8 @@ Everytime you run into problems, please just try your best and different approac
 """
             + database_schema
             + "\nConsider information only related to the following user: "
-            + basic_information,
+            + basic_information
+            + "Current date: 2024-05-29",
             model="gpt-4o",
             tools=[
                 {
