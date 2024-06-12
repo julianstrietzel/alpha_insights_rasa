@@ -19,9 +19,6 @@ from actions.utils.utils import (
 )
 
 
-# TODO split functions to one file each
-
-
 class ActionAskGPT(Action):
     def __init__(self):
         self.gpt_handler = None
@@ -103,90 +100,6 @@ class ActionSetGPTConfirmed(Action):
             "based chatbot, type 'exit'."
         )
         return [SlotSet("gpt_confirmed", True), FollowupAction("action_ask_gpt")]
-
-
-class ActionGetBasicUserDetails(Action):
-    def name(self) -> Text:
-        return "action_get_basic_user_details"
-
-    def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
-    ) -> List[Dict[Text, Any]]:
-        user_id = tracker.get_slot("user_id")
-        print(user_id)
-        if user_id is None or user_id == "-1":
-            dispatcher.utter_message("Please provide a user id.")
-            return []
-        details, response = ActionGetBasicUserDetails.get_patient_details(user_id)
-        if details is None:
-            dispatcher.utter_message("No user found with the provided user id.")
-            print(response)
-            return []
-        slot_events = [
-            SlotSet(key, value) for key, value in details.items() if value is not None
-        ]
-        print(details)
-        if details is None:
-            dispatcher.utter_message("No user found with the provided user id.")
-            print(response)
-            return slot_events
-        dispatcher.utter_message(
-            f"User {user_id} has the following details: {response}"
-        )
-        return slot_events
-
-    @staticmethod
-    def get_patient_details(user_id) -> Tuple[Optional[Dict], str]:
-        try:
-            # Define the SQL query
-            query = f"""SELECT id, health, geo, user_id, nickname, title, home_longitude, home_latitude, birthday, sex, 
-            medical_preconditions FROM patient WHERE user_id = {user_id};"""
-
-            result = DBHandler().execute_query(query)
-            # log result
-            print(result)
-            # log result datatype
-            print(type(result))
-            patient_details = None
-            if result:
-                result = result[0]
-                patient_details = {
-                    "health": result[1],
-                    "geo": result[2],
-                    "user_id": result[3],
-                    "nickname": result[4],
-                    "title": result[5],
-                    "home_longitude": result[6],
-                    "home_latitude": result[7],
-                    "birthday": result[8],
-                    "sex": result[9],
-                    "medical_preconditions": result[10],
-                }
-
-                response = "\n"
-                for detail_name, detail_value in [
-                    ("ID", patient_details["user_id"]),
-                    ("Health", patient_details["health"]),
-                    ("Geo", patient_details["geo"]),
-                    ("Nickname", patient_details["nickname"]),
-                    ("Title", patient_details["title"]),
-                    ("Home Longitude", patient_details["home_longitude"]),
-                    ("Home Latitude", patient_details["home_latitude"]),
-                    ("Birthday", patient_details["birthday"]),
-                    ("Sex", patient_details["sex"]),
-                    ("Medical Preconditions", patient_details["medical_preconditions"]),
-                ]:
-                    if detail_value is not None and detail_value != "":
-                        response += f"{detail_name}: {detail_value}\n"
-            else:
-                response = "No patient found with the given user ID."
-
-            return patient_details, response
-        except Exception as e:
-            return None, f"An error occurred: {e}"
 
 
 class ActionRecentBloodPressureReadings(Action):

@@ -11,7 +11,7 @@ rules:
       - action: action_grund_info
   - rule: get current bp status
     steps:
-      - intent: aktueller_blutdruck_status
+      - intent: aktueller_bd_status
       - action: action_aktueller_bd_status
   - rule: get more details about current bp if user asks
     steps:
@@ -31,8 +31,8 @@ rules:
       - action: action_wendepunkte
   - rule: get trend changes due to medication
     steps:
-      - intent: trendanderungen_medikation
-      - action: action_trendanderungen_medikation
+      - intent: trendaenderungen_medikation
+      - action: action_trendaenderungen_medikation
   - rule: get trends more generally over the recent time spans
     steps:
       - intent: trends

@@ -8,7 +8,7 @@ intents:
   - ablesungen_ausserhalb_zielbereich
   - details_ausreisser
   - wendepunkte
-  - trendanderungen_medikation
+  - trendaenderungen_medikation
   - trends
   - veraenderungen_ueber_tag
   - benutzer_id_bereitstellen # Currently not used!
@@ -37,24 +37,51 @@ session_config:
   carry_over_slots_to_new_session: true
 
 entities:
-  - user_id
-  - type
-  - direction
-  - limit
-  - change_date # date of change in medication
-  - timespan
+  - user_id:
+      influence_conversation: false
+  - type:
+      influence_conversation: false
+  - direction:
+      influence_conversation: false
+  #- limit:
+  #    influence_conversation: false
+  - change_date: # date of change in medication
+      influence_conversation: false
+  - timespan:
+      influence_conversation: false
 
 slots:
   type:
     type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: type
   direction:
     type: text
-  limit:
-    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: direction
+  #  limit:
+  #    type: text
+  #    influence_conversation: false
+  #    mappings:
+  #      - type: from_entity
+  #        entity: limit
   change_date:
     type: text
-  timespan:
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: change_date
+  timespan: # should be Tag, Woche, Monat, Jahr (english)
     type: text
+    influence_conversation: false
+    initial_value: "Month"
+    mappings:
+      - type: from_entity
+        entity: timespan
   user_id:
     type: text
     initial_value: "25601"
@@ -117,7 +144,7 @@ actions:
   - action_ablesungen_ausserhalb_zielbereich
   - action_details_ausreisser
   - action_wendepunkte
-  - action_trendanderungen_medikation
+  - action_trendaenderungen_medikation
   - action_trends
   - action_veraenderungen_ueber_tag
 

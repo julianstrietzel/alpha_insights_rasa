@@ -54,7 +54,7 @@ nlu:
       - unter der Grenze
       - unter dem Grenzwert
 
-  - synonym: Jahr
+  - synonym: Year
     examples: |
       - Jahren
       - Jahre
@@ -64,7 +64,7 @@ nlu:
       - Jahr
       - Jahre hinweg
 
-  - synonym: Monat
+  - synonym: Month
     examples: |
       - Monat
       - Monaten
@@ -74,7 +74,7 @@ nlu:
       - letzten Monat
       - in den letzten Monaten
 
-  - synonym: Woche
+  - synonym: Week
     examples: |
       - Woche
       - Wochen
@@ -84,7 +84,7 @@ nlu:
       - letzten Wochen
       - in den letzten Wochen
 
-  - synonym: Tag
+  - synonym: Day
     examples: |
       - Tag
       - Tage
@@ -159,19 +159,22 @@ nlu:
   - intent: erweiterter_bd_status
     examples: |
       - Wie haben sich die Blutdruckmessungen in der letzten [Woche](timespan) verhalten?
-      - Wie war der Blutdruck seit dem [25.12.2023](change_date)?
       - Höchste und niedrigste Messwerte im letzten [Monat](timespan)?
       - Wie verhält sich der Blutdruck des Patienten?
-      - BP [Wochen](timespan)verlauf
+      - BP [Wochen](timespan) verlauf
       - Blutdruckverlauf in den letzten [Tagen](timespan)
       - Was war mein Blutdruck im letzten [Monat](timespan)?
       - Welche waren meine höchsten und niedrigsten Werte im letzten [Monat](timespan)?
       - Wie war mein Blutdruck in der letzten [Woche](timespan)?
-      - Blutdruck seit dem [25.12.2023](change_date)
+      - BD in den letzten [Tagen](timespan)
+      - Wie war der Blutdruck
+      - Wie hat sich der BD verhalten?
+      - BD seit dem [12. März](change_date)
+      - BD nach dem [13. August](change_date)
 
   - intent: ablesungen_ausserhalb_zielbereich
     examples: |
-      - Hat der Benutzer in den letzten [Monat](timespan) Ablesungen des [systolischen](type) Blutdrucks [höher](direction) als [130](limit) mmHg gehabt?
+      - Hat der Benutzer in den letzten [Monat](timespan) Ablesungen des [systolischen](type) Blutdrucks [höher](direction) als 130 mmHg gehabt?
       - Können Sie mehr Details zu den Messungen über dem Zielbereich liefern?
       - Könnten Sie die [systolischen](type) Messwerte hervorheben, die [über](direction) dem Zielbereich lagen?
       - Können Sie mehr Informationen zu den [diastolischen](type) Blutdruckmessungen liefern, die den Zielbereich [unterschritten](direction) haben?
@@ -216,6 +219,10 @@ nlu:
 
   - intent: trendaenderungen_medikation
     examples: |
+      - Veränderungen im BD vor und nach dem [12. März](change_date)
+      - Hat sich der [systolische](type) Blutdruck verändert?
+      - BD vor und nach dem [12. August](change_date)
+      - BD vor dem Medikamentenwechsel
       - Hat sich der [systolische](type) Blutdruck des Benutzers seit dem [12. Dez](change_date) verändert?
       - Können Sie eine detaillierte Analyse der Blutdrucktrends des Patienten um den Medikamentenwechsel herum liefern?
       - Welche Schwankungen wurden in den [diastolischen](type) Blutdruckmessungen des Patienten seit der Medikamentenumstellung beobachtet?
@@ -227,6 +234,10 @@ nlu:
       - Veränderungen des Blutdrucks seit der neuen Medikation
       - Hat sich der Blutdruck seit dem Medikamentenwechsel verändert?
       - Gab es Änderungen im Blutdruck nach dem Wechsel der Medikation?
+      - [13. August](change_date) 
+      - [12. März](change_date)
+      - [25.11.2023](change_date)
+      - Trendänderungen nach dem Medikamentenwechsel
 
   - intent: trends
     examples: |
@@ -236,3 +247,46 @@ nlu:
       - Wie hat sich der Blutdruck über die zurückliegenden [Jahre](timespan) verändert?
       - Veränderungen im Blutdruck [systolisch](type)
       - Veränderungen im [diastolischen](type) Blutdruck 
+      - Wie haben sich die Blutdruckwerte des Patienten in den letzten [Tagen](timespan) verändert?
+      - Welche Trends sind in den Blutdruckmessungen des Patienten in den letzten [Monaten](timespan) zu erkennen?
+      - trends
+
+
+
+  - intent: veraenderungen_ueber_tag
+    examples: |
+      - Welche Muster oder Veränderungen in den Blutdruckmessungen können Sie aufgrund der Tageszeit feststellen?
+      - Wie variieren die Blutdruckmessungen des Patienten im Laufe des Tages?
+      - Könnten Sie signifikante Veränderungen oder Schwankungen im [systolischen](type) Blutdruck des Patienten aufgrund der Tageszeit hervorheben?
+      - Was sind die [diastolischen](type) Blutdrucktrends am Morgen, Nachmittag und Abend vor und nach dem [12. März](change_date)?
+      - Analyse der Blutdruckmessungen des Patienten nach Tageszeit
+      - Wie ist der [systolische](type) Blutdruck im Laufe des Tages?
+      - Wie verhält sich der Blutdruck über den Tag?
+      - Blutdruck morgens und abends
+      - BP-Veränderungen über den Tag vor und nach dem [13.03.2022](change_date)
+      - [Diastolischer](type) BD Wechsel im Tagesverlauf
+      - Gibt es bemerkenswerte [systolische](type) Blutdruckveränderungen am Morgen oder Abend?
+      - Welche Veränderungen treten im [systolischen](type) Blutdruck von morgens bis abends auf?
+      - Was ist das Tagesmuster für den [diastolischen](type) Blutdruck?
+      - Gibt es BD-Spitzen oder -Tiefs im Laufe des Tages?
+      - Wie ist der [diastolische](type) Blutdruck morgens im Vergleich zum Abend?
+      - Schwankt der BD stark im Laufe des Tages? Vergleiche vor und nach dem Medikationswechsel am [12. März](change_date).
+      - Wie verändert sich der [systolische](type) Blutdruck des Patienten während des Tages?
+      - Welche Blutdruckveränderungen im [systolischen](type) treten zu verschiedenen Tageszeiten auf?
+      - Gibt es Unterschiede im [diastolischen](type) Blutdruck zwischen morgens und abends?
+      - Wie unterscheiden sich die [systolischen](type) Blutdruckwerte am Morgen von denen am Abend?
+      - Kann der tägliche Verlauf des [diastolischen](type) Blutdrucks analysiert werden?
+      - Welche Unterschiede gibt es im [systolischen](type) Blutdruck zwischen verschiedenen Tageszeiten?
+      - Gibt es signifikante Schwankungen im [diastolischen](type) Blutdruck im Tagesverlauf?
+      - Verändert sich der [systolische](type) Blutdruck des Patienten im Laufe des Tages?
+      - Welche Zeit des Tages zeigt die größten [diastolischen](type) Blutdruckschwankungen?
+      - Wie sieht das tägliche Blutdruckprofil des Patienten aus?
+      - Gibt es Unterschiede im [systolischen](type) Blutdruck während des Tages?
+      - Wie verhalten sich die [diastolischen](type) Blutdruckmessungen über den Tag verteilt?
+      - Wie hat sich der [systolische](type) Blutdruck seit dem [12. März](change_date) im Tagesverlauf verändert?
+      - Gibt es Unterschiede im [systolischen](type) Blutdruck vor und nach dem [13.03.2022](change_date) im Tagesverlauf?
+      - Haben sich die [diastolischen](type) Blutdruckwerte am [12. März](change_date) im Tagesverlauf verändert?
+      - Wie haben sich die [systolischen](type) Blutdruckwerte im Laufe des Tages seit dem [12. März](change_date) verändert?
+      - Gibt es Muster in den [diastolischen](type) Messungen im Tagesverlauf?
+      - Wie variieren die [systolischen](type) Blutdruckwerte im Tagesverlauf?
+      - Welche signifikanten Veränderungen gibt es im [diastolischen](type) Blutdruck je nach Tageszeit?

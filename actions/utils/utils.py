@@ -4,6 +4,89 @@ from typing import List, Tuple
 from actions.utils.db_utils import DBHandler
 
 
+def get_patient_details(user_id: str, force_reload=False, tracker=None) -> dict:
+    if not force_reload and tracker and tracker.get_slot("birthday"):
+        patient_details = {
+            "health": tracker.get_slot("health"),
+            "geo": tracker.get_slot("geo"),
+            "user_id": tracker.get_slot("user_id"),
+            "nickname": tracker.get_slot("nickname"),
+            "title": tracker.get_slot("title"),
+            "home_longitude": tracker.get_slot("home_longitude"),
+            "home_latitude": tracker.get_slot("home_latitude"),
+            "birthday": tracker.get_slot("birthday"),
+            "sex": tracker.get_slot("sex"),
+            "medical_preconditions": tracker.get_slot("medical_preconditions"),
+        }
+        return patient_details
+    query = f"""SELECT id, health, geo, user_id, nickname, title, home_longitude, home_latitude, birthday, sex, 
+                medical_preconditions FROM patient WHERE user_id = {user_id};"""
+    result = DBHandler().execute_query(query)
+    if result:
+        result = result[0]
+        patient_details = {
+            "health": result[1],
+            "geo": result[2],
+            "user_id": result[3],
+            "nickname": result[4],
+            "title": result[5],
+            "home_longitude": result[6],
+            "home_latitude": result[7],
+            "birthday": result[8],
+            "sex": result[9],
+            "medical_preconditions": result[10] or "",
+        }
+        return patient_details
+    else:
+        return None
+
+
+def get_bp_range(birthdate, has_pre_existing_conditions):
+    """
+    Returns the systolic and diastolic blood pressure ranges based on age and pre-existing conditions.
+
+    Parameters:
+    birthdate (str): The birthdate in 'YYYY-MM-DD' format.
+    has_pre_existing_conditions (bool): Whether the person has pre-existing conditions.
+
+    Returns:
+    tuple: A tuple containing the systolic and diastolic ranges.
+    """
+    # Define the blood pressure ranges based on age and pre-existing conditions
+    systolicTarget = {
+        1: [119, 131],  # <65 with pre-existing conditions
+        2: [128, 141],  # >65 with pre-existing conditions
+        3: [120, 135],  # others
+    }
+
+    diastolicTarget = {
+        1: [70, 79],  # <65 with pre-existing conditions
+        2: [70, 79],  # >65 with pre-existing conditions
+        3: [71, 84],  # others
+    }
+
+    # Calculate age from birthdate
+    birthdate = datetime.strptime(birthdate, "%Y-%m-%d")
+    today = datetime.today()
+    age = (
+        today.year
+        - birthdate.year
+        - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    )
+
+    if has_pre_existing_conditions:
+        if age < 65:
+            category = 1
+        else:
+            category = 2
+    else:
+        category = 3
+
+    systolic_range = systolicTarget[category]
+    diastolic_range = diastolicTarget[category]
+    return systolic_range, diastolic_range
+
+
 def get_within(span, value) -> str:
     if span[0] <= value <= span[1]:
         return "within"
