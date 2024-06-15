@@ -3,3 +3,4 @@
 /.idea/
 /venv/
 /actions/__pycache__/
+tmp*.png

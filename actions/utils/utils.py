@@ -235,3 +235,14 @@ def fetch_latest_bp_measurement(user_id):
     )
     print("result", result)
     return result[0] if result else None
+
+
+def get_time_of_day(recorded_at):
+    if 6 <= recorded_at.hour < 12:
+        return "Morning"
+    elif 12 <= recorded_at.hour < 16:
+        return "Afternoon"
+    elif 16 <= recorded_at.hour < 22:
+        return "Evening"
+    elif 22 <= recorded_at.hour < 24 or 0 <= recorded_at.hour < 6:
+        return "Night"

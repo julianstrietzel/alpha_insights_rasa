@@ -1,10 +1,12 @@
 import uuid
-from typing import Optional, Text
+from typing import Optional, Text, Any
 
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
-from actions.action_aktueller_bd_status import ActionAktuellerBDStatus
+from actions.action_ablesungen_ausserhalb_zielbereich import (
+    ActionAblesungenAusserhalbZielbereich,
+)
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -12,8 +14,14 @@ class MockDispatcher(CollectingDispatcher):
         self.messages = []
         super().__init__()
 
-    def utter_message(self, text: Optional[Text]):
-        self.messages.append(text)
+    def utter_message(self, text: Optional[Text], image: Optional[Text]):
+        if text:
+            self.messages.append(text)
+        else:
+            self.messages.append(image)
+
+    def utter_attachment(self, attachment: Text, **kwargs: Any) -> None:
+        self.messages.append(attachment)
 
 
 class TestClient:
@@ -40,7 +48,7 @@ class TestClient:
         return dispatcher.messages, slots
 
 
-client = TestClient(ActionAktuellerBDStatus())
+client = TestClient(ActionAblesungenAusserhalbZielbereich())
 
 messages, slots = client.invoke_message(
     None,
@@ -55,6 +63,8 @@ messages, slots = client.invoke_message(
         "birthday": "2020-01-01",
         "sex": "FEMALE",
         "medical_preconditions": "",
+        "timespan": "Woche",
+        "typ": "systolisch",
     },
 )
 print("Messages from dispatcher:\n")
