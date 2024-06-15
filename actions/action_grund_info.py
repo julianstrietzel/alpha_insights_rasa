@@ -34,7 +34,7 @@ class ActionGrundInfo(Action):
             if patient_details:
                 systolic_range, diastolic_range = get_bp_range(
                     patient_details["birthday"],
-                    patient_details["medical_precondition"]
+                    patient_details["medical_preconditions"]
                     != "",  # TODO check if this works
                 )
                 query = f"""
@@ -73,7 +73,7 @@ class ActionGrundInfo(Action):
                     )
                     return patient_details
 
-                print(result)
+                print(sex)
 
                 total = result[10]
                 systolic_in_range = result[1]
@@ -102,9 +102,9 @@ class ActionGrundInfo(Action):
                     datetime.today().year
                     - datetime.strptime(patient_details["birthday"], "%Y-%m-%d").year
                 )
-
-                gender = "Die Patientin" if sex == "female" else "Der Patient"
-                gender_de = "weiblich" if str(sex).lower() == "female" else "männlich"
+                bin_female = str(sex).lower() == "female"
+                gender = "Die Patientin" if bin_female else "Der Patient"
+                gender_de = "weiblich" if bin_female else "männlich"
                 pre_conditions = (
                     f"mit bekannten Vorerkrankungen ({pre_existing_conditions})"
                     if pre_existing_conditions not in ["", None]
@@ -113,17 +113,17 @@ class ActionGrundInfo(Action):
 
                 dispatcher.utter_message(
                     f"{gender} ({gender_de}, {age} Jahre alt) {pre_conditions} hat {(all_normal) / (total) * 100:.0f}% "
-                    f"{'ihrer' if sex == 'female' else 'seiner'} Blutdruckmessungen ausschließlich innerhalb des "
+                    f"{'ihrer' if bin_female else 'seiner'} Blutdruckmessungen ausschließlich innerhalb des "
                     f"Zielbereichs.\n"
                 )
 
                 if systolic_total_out_of_range / total > 0.1:
                     dispatcher.utter_message(
-                        f"{systolic_above_range / total * 100:.0f}% der systolischen Messungen liegen darüber, {systolic_below_range / total * 100:.0f}% darunter.\n"
+                        f"Systolische Messungen:\t{systolic_above_range / total * 100:.0f}% darüber,\t{systolic_below_range / total * 100:.0f}% darunter.\n"
                     )
                 if diastolic_total_out_of_range / total > 0.1:
                     dispatcher.utter_message(
-                        f"{diastolic_above_range / total * 100:.0f}% der diastolischen Messungen liegen darüber, {diastolic_below_range / total * 100:.0f}% darunter.\n"
+                        f"Diastolische Messungen:\t{diastolic_above_range / total * 100:.0f}% darüber,\t{diastolic_below_range / total * 100:.0f}% darunter.\n"
                     )
 
                 if pulse_total_out_of_range / total > 0.1:

@@ -41,6 +41,16 @@ def get_patient_details(user_id: str, force_reload=False, tracker=None) -> dict:
         return None
 
 
+def calculate_percentages(readings, bp_range):
+    if not readings:
+        return 0, 0, 0
+    below_range = len([x for x in readings if x < bp_range[0]])
+    in_range = len([x for x in readings if bp_range[0] <= x <= bp_range[1]])
+    above_range = len([x for x in readings if x > bp_range[1]])
+    total = len(readings)
+    return below_range / total * 100, in_range / total * 100, above_range / total * 100
+
+
 def get_bp_range(birthdate, has_pre_existing_conditions):
     """
     Returns the systolic and diastolic blood pressure ranges based on age and pre-existing conditions.
@@ -96,6 +106,12 @@ def get_within(span, value) -> str:
         return "above"
     else:
         return "unknown"
+
+
+def is_in_range(systolic, diastolic, bp_range):
+    sys_in_range = bp_range[0][0] <= systolic <= bp_range[0][1]
+    dia_in_range = bp_range[1][0] <= diastolic <= bp_range[1][1]
+    return sys_in_range, dia_in_range
 
 
 def get_trend(prev, curr) -> str:
@@ -208,3 +224,14 @@ WHERE user_id = {user_id}
 ORDER BY recorded_at DESC
 LIMIT 1;"""
     return bool(DBHandler().execute_query(query))
+
+
+def fetch_latest_bp_measurement(user_id):
+    # Placeholder function to fetch the latest measurement
+    # Replace this with your actual function to fetch the data
+    result = DBHandler().execute_query(
+        f"SELECT id, systolic, diastolic, pulse, recorded_at"
+        f" FROM bloodpressure WHERE user_id = {user_id} ORDER BY recorded_at DESC LIMIT 1"
+    )
+    print("result", result)
+    return result[0] if result else None

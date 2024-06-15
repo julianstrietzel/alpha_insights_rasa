@@ -74,23 +74,34 @@ class DBHandler:
             return results
         except psycopg2.OperationalError as e:
             self.conn.rollback()
-            return "Operational error: " + str(e)
+            if self.stringify:
+                return "Operational error: " + str(e)
+            raise e
         except psycopg2.ProgrammingError as e:
             self.conn.rollback()
-            return "Programming error: " + str(e)
+            if self.stringify:
+                return "Programming error: " + str(e)
+            raise e
         except psycopg2.IntegrityError as e:
             self.conn.rollback()
-            return "Integrity error: " + str(e)
+            if self.stringify:
+                return "Integrity error: " + str(e)
+            raise e
         except psycopg2.DataError as e:
             self.conn.rollback()
-            return "Data error: " + str(e)
+            if self.stringify:
+                return "Data error: " + str(e)
+            raise e
         except psycopg2.InternalError as e:
             self.conn.rollback()
-            return "Internal error: " + str(e)
+            if self.stringify:
+                return "Internal error: " + str(e)
+            raise e
         except psycopg2.InFailedSqlTransaction as e:
             self.conn.rollback()
-            return "Transaction failed and was rolled back: " + str(e)
-        return None
+            if self.stringify:
+                return "Transaction failed and was rolled back: " + str(e)
+            raise e
 
     def close(self):
         self.conn.close()
