@@ -4,9 +4,7 @@ from typing import Optional, Text, Any
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
-from actions.action_ablesungen_ausserhalb_zielbereich import (
-    ActionAblesungenAusserhalbZielbereich,
-)
+from actions.action_details_ausreisser import ActionDetailsAusreisser
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -14,7 +12,7 @@ class MockDispatcher(CollectingDispatcher):
         self.messages = []
         super().__init__()
 
-    def utter_message(self, text: Optional[Text], image: Optional[Text]):
+    def utter_message(self, text: Optional[Text] = None, image: Optional[Text] = None):
         if text:
             self.messages.append(text)
         else:
@@ -48,7 +46,7 @@ class TestClient:
         return dispatcher.messages, slots
 
 
-client = TestClient(ActionAblesungenAusserhalbZielbereich())
+client = TestClient(ActionDetailsAusreisser())
 
 messages, slots = client.invoke_message(
     None,
@@ -65,6 +63,7 @@ messages, slots = client.invoke_message(
         "medical_preconditions": "",
         "timespan": "Woche",
         "typ": "systolisch",
+        "change_date": "2024-04-01",
     },
 )
 print("Messages from dispatcher:\n")

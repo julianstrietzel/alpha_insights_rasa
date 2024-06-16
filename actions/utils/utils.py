@@ -3,6 +3,26 @@ from typing import List, Tuple
 
 from actions.utils.db_utils import DBHandler
 
+zeitspanne_to_timespan = {
+    "Tag": "day",
+    "Woche": "week",
+    "Monat": "month",
+    "Jahr": "year",
+}
+mehrzahl_zeitspanne = {
+    "Tag": "Tagen",
+    "Woche": "Wochen",
+    "Monat": "Monaten",
+    "Jahr": "Jahren",
+}
+
+at_the_last_prefix = {
+    "Tag": "Am letzten Tag",
+    "Woche": "In der letzten Woche",
+    "Monat": "Im letzten Monat",
+    "Jahr": "Im letzten Jahr",
+}
+
 
 def get_patient_details(user_id: str, force_reload=False, tracker=None) -> dict:
     if not force_reload and tracker and tracker.get_slot("birthday"):
@@ -239,10 +259,23 @@ def fetch_latest_bp_measurement(user_id):
 
 def get_time_of_day(recorded_at):
     if 6 <= recorded_at.hour < 12:
-        return "Morning"
+        return "Morgen"
     elif 12 <= recorded_at.hour < 16:
-        return "Afternoon"
+        return "Nachmittag"
     elif 16 <= recorded_at.hour < 22:
-        return "Evening"
+        return "Abend"
     elif 22 <= recorded_at.hour < 24 or 0 <= recorded_at.hour < 6:
-        return "Night"
+        return "Nacht"
+
+
+def recorded_at_to_datetime(results):
+    results = [
+        (
+            systolic,
+            diastolic,
+            pulse,
+            datetime.strptime(recorded_at, "%Y-%m-%d %H:%M:%S.%f"),
+        )
+        for systolic, diastolic, pulse, recorded_at in results
+    ]
+    return results

@@ -1,4 +1,4 @@
-import os
+import pathlib
 from datetime import datetime
 from typing import Text
 
@@ -8,7 +8,13 @@ import seaborn as sns
 from rasa_sdk import Action
 
 from actions.utils.db_utils import DBHandler
-from actions.utils.utils import get_blood_pressure_spans, get_time_of_day
+from actions.utils.utils import (
+    get_blood_pressure_spans,
+    get_time_of_day,
+    zeitspanne_to_timespan,
+    mehrzahl_zeitspanne,
+    recorded_at_to_datetime,
+)
 
 
 class ActionAblesungenAusserhalbZielbereich(Action):
@@ -23,25 +29,13 @@ class ActionAblesungenAusserhalbZielbereich(Action):
         direction = tracker.get_slot("direction") or "über"
         typ = tracker.get_slot("typ") or None
         limit = tracker.get_slot("limit") or None
-        timespan_to_zeitspanne = {
-            "Tag": "day",
-            "Woche": "week",
-            "Monat": "month",
-            "Jahr": "year",
-        }
-        mehrzahl_zeitspanne = {
-            "Tag": "Tagen",
-            "Woche": "Wochen",
-            "Monat": "Monaten",
-            "Jahr": "Jahren",
-        }
 
         if zeitspanne_entity:
-            date_filter = f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {timespan_to_zeitspanne[zeitspanne_entity]}'"
+            date_filter = f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {zeitspanne_to_timespan[zeitspanne_entity]}'"
         elif change_date:
             date_filter = f"AND CAST(recorded_at AS timestamp) >= '{change_date}'"
         else:
-            date_filter = f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {timespan_to_zeitspanne[zeitspanne]}'"
+            date_filter = f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {zeitspanne_to_timespan[zeitspanne]}'"
         query = f"""
                 SELECT
                     systolic,
@@ -58,15 +52,7 @@ class ActionAblesungenAusserhalbZielbereich(Action):
         if not results:
             dispatcher.utter_message("Keine Daten gefunden.")
             return []
-        results = [
-            (
-                systolic,
-                diastolic,
-                pulse,
-                datetime.strptime(recorded_at, "%Y-%m-%d %H:%M:%S.%f"),
-            )
-            for systolic, diastolic, pulse, recorded_at in results
-        ]
+        results = recorded_at_to_datetime(results)
         count_bp_measurements = len(results)
         systolic_span, diastolic_span, _ = get_blood_pressure_spans(tracker, user_id)
         if typ == "systolisch" and limit:
@@ -85,19 +71,21 @@ class ActionAblesungenAusserhalbZielbereich(Action):
                 return
             of_range_quote = round(len(of_range_bp_measurements) / len(results) * 100)
             dispatcher.utter_message(
-                f"Von den {count_bp_measurements} Blutdruckmessungen "
-                + (
-                    f"in den letzten 3 {mehrzahl_zeitspanne[zeitspanne]}"
-                    if not change_date
-                    else ("seit dem " + change_date)
+                text=(
+                    f"Von den {count_bp_measurements} Blutdruckmessungen "
+                    + (
+                        f"in den letzten 3 {mehrzahl_zeitspanne[zeitspanne]}"
+                        if not change_date
+                        else ("seit dem " + change_date)
+                    )
+                    + " liegen "
+                    + str(len(of_range_bp_measurements))
+                    + f" ({of_range_quote}%) der {typ} Blutdruckmessungen "
+                    + str(direction)
+                    + " "
+                    + str(span[1])
+                    + " mmHg."
                 )
-                + " liegen "
-                + str(len(of_range_bp_measurements))
-                + f" ({of_range_quote}%) der {typ} Blutdruckmessungen "
-                + str(direction)
-                + " "
-                + str(span[1])
-                + " mmHg."
             )
 
             morning_bp_measurements = [
@@ -163,7 +151,7 @@ class ActionAblesungenAusserhalbZielbereich(Action):
             "Diastolic": [
                 diastolic for systolic, diastolic, pulse, recorded_at in results
             ],
-            "Daytime": [
+            "Tageszeit": [
                 get_time_of_day(recorded_at)
                 for systolic, diastolic, pulse, recorded_at in results
             ],
@@ -177,22 +165,25 @@ class ActionAblesungenAusserhalbZielbereich(Action):
             data=df,
             x="Systolic",
             y="Diastolic",
-            hue="Daytime",
-            style="Daytime",
+            hue="Tageszeit",
+            style="Tageszeit",
             palette="deep",
         )
         systolic_span, diastolic_span, _ = get_blood_pressure_spans(tracker, user_id)
-        plt.title("Blood Pressure Readings Grouped by Daytime - Outliers Only")
-        plt.xlabel("Systolic (mmHg)")
-        plt.ylabel("Diastolic (mmHg)")
+        plt.title("Blutdruckmessungen gruppiert nach Tageszeit")
+        plt.xlabel("Systolisch (mmHg)")
+        plt.ylabel("Diastolisch (mmHg)")
         plt.axvspan(systolic_span[0], systolic_span[1], color="green", alpha=0.1)
         print(systolic_span, diastolic_span)
         plt.axhspan(diastolic_span[0], diastolic_span[1], color="green", alpha=0.1)
-        plt.legend(title="Daytime", bbox_to_anchor=(1.05, 1), loc="upper left")
+        plt.legend(title="Tageszeit", bbox_to_anchor=(1.05, 1), loc="upper left")
         plt.grid(True)
         plt.tight_layout()
         # plt to image and send
-        title = os.getcwd() + "/tmp_scatter_plot_" + str(datetime.now()) + ".png"
-        plt.savefig(title)
-        dispatcher.utter_message(image=title)
+        file_path = str(
+            pathlib.Path().parent.absolute()
+            / ("tmp_scatter_plot_" + str(datetime.now()) + ".png")
+        )
+        plt.savefig(file_path)
+        dispatcher.utter_message(image=str(file_path))
         return []
