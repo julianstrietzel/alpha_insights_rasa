@@ -1,4 +1,9 @@
-openai~=1.28.1
+openai
 rasa~=3.6.2
 streamlit
 requests
+seaborn
+pandas
+matplotlib
+ruptures
+scikit-learn

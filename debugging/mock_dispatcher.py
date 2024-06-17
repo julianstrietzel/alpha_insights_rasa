@@ -5,6 +5,7 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
 from actions.action_details_ausreisser import ActionDetailsAusreisser
+from actions.action_wendepunkte import ActionWendepunkte
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -46,7 +47,7 @@ class TestClient:
         return dispatcher.messages, slots
 
 
-client = TestClient(ActionDetailsAusreisser())
+client = TestClient(ActionWendepunkte())
 
 messages, slots = client.invoke_message(
     None,
