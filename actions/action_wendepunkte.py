@@ -34,7 +34,7 @@ class ActionWendepunkte(Action):
             dispatcher.utter_message("Keine Daten gefunden.")
             return []
 
-        def analyze_inflection_points(data, typ):
+        def analyze_inflection_points(data, typ, span):
             signal = data[typ].values
             data['idx'] = range(len(data))
             data['recorded_at'] = pd.to_datetime(data['recorded_at'])
@@ -42,7 +42,7 @@ class ActionWendepunkte(Action):
             algo = rpt.Dynp(model=model, min_size=7, jump=5).fit(signal)
             inflection_result = algo.predict(n_bkps=3)[:-1]
             plt.figure(figsize=(10, 6))
-            sns.scatterplot(data=data, x='idx', y=typ, color='black')
+            sns.scatterplot(data=data, x='idx', y=typ, color='black', label='Messwerte')
             segments = []
             prev = 0
             for bkp in inflection_result:
@@ -51,14 +51,15 @@ class ActionWendepunkte(Action):
                 y = segment_data[typ].values
                 reg = sklearn.linear_model.LinearRegression().fit(X, y)
                 segments.append((segment_data, reg))
-                plt.axvline(x=data['idx'].iloc[bkp], color='r', linestyle='--')
-                sns.regplot(data=data.iloc[prev:bkp], x='idx', y=typ, scatter=False, color='blue')
+                plt.axvline(x=data['idx'].iloc[bkp], color='r', linestyle='--', label='Wendepunkt' if prev == 0 else None)
+                sns.regplot(data=data.iloc[prev:bkp], x='idx', y=typ, scatter=False, color='blue', label='Trendlinie' if prev == 0 else None)
                 prev = bkp
             sns.regplot(data=data.iloc[prev:], x='idx', y=typ, scatter=False, color='blue')
             segment_data = data.iloc[prev:]
             X = segment_data['recorded_at_ordinal'].values.reshape(-1, 1)
             y = segment_data[typ].values
             segments.append((segment_data, sklearn.linear_model.LinearRegression().fit(X, y)))
+            plt.axhspan(span[0], span[1], color='green', alpha=0.1, label='Normalbereich')
             # Adjust x-axis to display datetime values
             ax = plt.gca()
             plt.xlabel('Datum')
@@ -85,7 +86,9 @@ class ActionWendepunkte(Action):
                     f"{i + 1}. Wir sehen einen {trend} von {start_bp:.0f} auf {end_bp:.0f} vom {start_date} bis zum {end_date}.")
             for s in summary:
                 dispatcher.utter_message(s)
-
+            if change_date:
+                respective_id = data[data['recorded_at'] <= datetime.strptime(change_date, "%Y-%m-%d")].iloc[-1]['idx']
+                plt.axvline(x=respective_id, color='g', linestyle='--', label='Änderungsdatum' + f' ({change_date.strftime("%d.%m.%Y")})')
             filename = str(
                 pathlib.Path().parent.absolute()
                 / (
@@ -99,10 +102,10 @@ class ActionWendepunkte(Action):
             dispatcher.utter_message(image=filename)
 
         if typ:
-            analyze_inflection_points(data, typ)
+            analyze_inflection_points(data, typ, systolic_span if typ == "systolisch" else diastolic_span)
         else:
-            analyze_inflection_points(data, "systolisch")
-            analyze_inflection_points(data, "diastolisch")
+            analyze_inflection_points(data, "systolisch", systolic_span)
+            analyze_inflection_points(data, "diastolisch", diastolic_span)
 
 
 def init_method_run(tracker):

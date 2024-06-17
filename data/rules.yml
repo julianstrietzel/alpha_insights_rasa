@@ -30,7 +30,7 @@ rules:
       - intent: wendepunkte
       - action: action_wendepunkte
   - rule: get trend changes due to medication
-    steps:
+    steps: # TODO Only if change date is set!
       - intent: trendaenderungen_medikation
       - action: action_trendaenderungen_medikation
   - rule: get trends more generally over the recent time spans
