@@ -51,8 +51,10 @@ class ActionWendepunkte(Action):
                 y = segment_data[typ].values
                 reg = sklearn.linear_model.LinearRegression().fit(X, y)
                 segments.append((segment_data, reg))
-                plt.axvline(x=data['idx'].iloc[bkp], color='r', linestyle='--', label='Wendepunkt' if prev == 0 else None)
-                sns.regplot(data=data.iloc[prev:bkp], x='idx', y=typ, scatter=False, color='blue', label='Trendlinie' if prev == 0 else None)
+                plt.axvline(x=data['idx'].iloc[bkp], color='r', linestyle='--',
+                            label='Wendepunkt' if prev == 0 else None)
+                sns.regplot(data=data.iloc[prev:bkp], x='idx', y=typ, scatter=False, color='blue',
+                            label='Trendlinie' if prev == 0 else None)
                 prev = bkp
             sns.regplot(data=data.iloc[prev:], x='idx', y=typ, scatter=False, color='blue')
             segment_data = data.iloc[prev:]
@@ -88,14 +90,10 @@ class ActionWendepunkte(Action):
                 dispatcher.utter_message(s)
             if change_date:
                 respective_id = data[data['recorded_at'] <= datetime.strptime(change_date, "%Y-%m-%d")].iloc[-1]['idx']
-                plt.axvline(x=respective_id, color='g', linestyle='--', label='Änderungsdatum' + f' ({change_date.strftime("%d.%m.%Y")})')
+                plt.axvline(x=respective_id, color='g', linestyle='--',
+                            label='Änderungsdatum' + f' ({change_date.strftime("%d.%m.%Y")})')
             filename = str(
-                pathlib.Path().parent.absolute()
-                / (
-                        f"tmp_{user_id}_{typ}_wendepunkte_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
-                        + str(datetime.now())
-                        + ".png"
-                )
+                pathlib.Path().parent.absolute() / f"tmp_{user_id}_{typ}_wendepunkte_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
             )
             plt.tight_layout()
             plt.savefig(filename)
