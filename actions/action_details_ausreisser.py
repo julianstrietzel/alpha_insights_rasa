@@ -8,6 +8,7 @@ import pandas as pd
 import seaborn as sns
 from rasa_sdk import Action
 
+from actions import ddp
 from actions.utils import utils
 from actions.utils.db_utils import DBHandler
 from actions.utils.utils import zeitspanne_to_timespan, at_the_last_prefix
@@ -18,15 +19,15 @@ class ActionDetailsAusreisser(Action):
         return "action_details_ausreisser"
 
     def run(self, dispatcher, tracker, domain):
-        dispatcher.utter_message(self.name())  # TODO remove
         user_id = tracker.get_slot("user_id") or 25601
         typ = tracker.get_slot("typ") or None
         zeitspanne = next(tracker.get_latest_entity_values("timespan"), None)
-        change_date = tracker.get_slot("change_date") or None
-        pretty_change_date = (
-            pd.to_datetime(change_date).strftime("%d.%m.%Y") if change_date else None
-        )
-        since_date = bool(change_date)
+        change_date_input = tracker.get_slot("change_date") or None
+        if change_date_input:
+            change_date_parsed = ddp.get_date_data(change_date_input).date_obj
+        else:
+            change_date_parsed = None
+        since_date = bool(change_date_parsed)
         systolic_span, diastolic_span, _ = utils.get_blood_pressure_spans(
             tracker, user_id
         )
@@ -39,9 +40,9 @@ class ActionDetailsAusreisser(Action):
         else:
             zeitspanne = tracker.get_slot("timespan") or "Monat"
             timespan = zeitspanne_to_timespan.get(zeitspanne)
-            if change_date:
+            if since_date:
                 since_date = True
-                date_filter = f"AND CAST(recorded_at AS timestamp) >= '{change_date}'"
+                date_filter = f"AND CAST(recorded_at AS timestamp) >= '{change_date_parsed.strftime('%Y-%m-%d')}'"
             else:
                 date_filter = f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {timespan}'"
 
@@ -104,14 +105,15 @@ class ActionDetailsAusreisser(Action):
             plt.xticks(rotation=45)
 
             if since_date:
-                df["Änderungsdatum"] = pd.to_datetime(change_date).to_period(
+                df["Änderungsdatum"] = pd.to_datetime(change_date_parsed).to_period(
                     timespan.capitalize()[0]
                 )
                 vline = plt.axvline(
                     x=df["Änderungsdatum"].astype(str).iloc[0],
                     color="red",
                     linestyle="--",
-                    label="Änderungsdatum" + f" ({change_date})",
+                    label="Änderungsdatum"
+                    + f" ({change_date_parsed.strftime('%d.%m.%Y')})",
                 )
                 ax = plt.gca()
                 trans = transforms.blended_transform_factory(ax.transData, ax.transAxes)
@@ -147,11 +149,15 @@ class ActionDetailsAusreisser(Action):
         df_recently = (
             df[df["Datum"] >= current_date_one_timespan_ago]
             if not since_date
-            else df[df["Datum"] >= pd.to_datetime(change_date)]
+            else df[df["Datum"] >= pd.to_datetime(change_date_parsed)]
         )
 
         utter_quote_outliers_recently(
-            df_recently, dispatcher, pretty_change_date, since_date, zeitspanne
+            df_recently,
+            dispatcher,
+            change_date_parsed,
+            since_date,
+            zeitspanne,
         )
 
         recent_dia_outliers, recent_sys_outliers = utter_outliers_daytime(
@@ -160,11 +166,10 @@ class ActionDetailsAusreisser(Action):
 
         if since_date:
             utter_change_in_outliers_since_date(
-                change_date,
+                change_date_parsed,
                 detect_outliers,
                 df_recently,
                 dispatcher,
-                pretty_change_date,
                 recent_dia_outliers,
                 recent_sys_outliers,
                 user_id,
@@ -181,11 +186,10 @@ class ActionDetailsAusreisser(Action):
 
 # Die Anzahl der Ausreißer hat sich nach der Medikamentenänderung am ... signifikant auf 20% und 5% reduziert.
 def utter_change_in_outliers_since_date(
-    change_date,
+    change_date_parsed,
     detect_outliers,
     df_recently,
     dispatcher,
-    pretty_change_date,
     recent_dia_outliers,
     recent_sys_outliers,
     user_id,
@@ -200,7 +204,7 @@ def utter_change_in_outliers_since_date(
                         bloodpressure
                     WHERE 
                         user_id = {user_id}
-                        AND CAST(recorded_at AS timestamp) <= '{change_date}'
+                        AND CAST(recorded_at AS timestamp) <= '{change_date_parsed.strftime('%Y-%m-%d')}'
                 """
     results = DBHandler().execute_query(query)
     if not results:
@@ -221,11 +225,11 @@ def utter_change_in_outliers_since_date(
         len(df_before[df_before["Diastolische Ausreißer"]]) / len(df_before) * 100
     )
     dispatcher.utter_message(
-        f"Die Quote der Ausreißer im systolischen Blutwert hat sich seit dem {pretty_change_date} von {round(sys_percent_before)}% auf {round(sys_percent_after)}% "
+        f"Die Quote der Ausreißer im systolischen Blutwert hat sich seit dem {change_date_parsed.strftime('%d.%m.%Y')} von {round(sys_percent_before)}% auf {round(sys_percent_after)}% "
         + ("erhöht." if sys_percent_after > sys_percent_before else "verringert.")
     )
     dispatcher.utter_message(
-        f"Die Quote der Ausreißer im diastolischen Blutwert hat sich seit dem {pretty_change_date} von {round(dia_percent_before)}% auf {round(dia_percent_after)}% "
+        f"Die Quote der Ausreißer im diastolischen Blutwert hat sich seit dem {change_date_parsed.strftime('%d.%m.%Y')} von {round(dia_percent_before)}% auf {round(dia_percent_after)}% "
         + ("erhöht." if dia_percent_after > dia_percent_before else "verringert.")
     )
 
@@ -255,9 +259,10 @@ def df_from_result(results):
 
 # In der letzten Woche waren 50% der systolischen und 30% der diastolischen Messungen extreme Ausreißer.
 def utter_quote_outliers_recently(
-    df_recently, dispatcher, pretty_change_date, since_date, zeitspanne
+    df_recently, dispatcher, change_date, since_date, zeitspanne
 ):
     # In der letzten Woche waren 50% der systolischen und 30% der diastolischen Messungen extreme Ausreißer.
+    pretty_change_date = change_date.strftime("%d.%m.%Y") if change_date else None
     if len(df_recently) > 0:
         sys_outliers_quote = round(
             len(df_recently[df_recently["Systolische Ausreißer"]])

@@ -7,6 +7,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from rasa_sdk import Action
 
+from actions import ddp
 from actions.utils import utils
 from actions.utils.db_utils import DBHandler
 
@@ -18,14 +19,14 @@ class ActionTrendanderungenMedikation(Action):
     def run(self, dispatcher, tracker, domain):
         user_id = tracker.get_slot("user_id") or 25601
         change_date = tracker.get_slot("change_date") or None
-        change_date_not_str = pd.to_datetime(change_date)
+        change_date = ddp.get_date_data(change_date).date_obj if change_date else None
         if not change_date:
             dispatcher.utter_message(
                 "Bitte geben Sie ein Datum der relevanten Medikationsänderung an."
             )
             return []
         pretty_change_date = (
-            pd.to_datetime(change_date).strftime("%d.%m.%Y") if change_date else None
+            change_date.strftime("%d.%m.%Y") if change_date else None
         )
         systolic_span, diastolic_span, _ = utils.get_blood_pressure_spans(
             tracker, user_id
@@ -47,12 +48,12 @@ class ActionTrendanderungenMedikation(Action):
         bp_data = pd.DataFrame(
             results, columns=["Systolic", "Diastolic", "Pulse", "Date"]
         )
-        bp_data["Event"] = bp_data["Date"] >= change_date
+        bp_data["Event"] = bp_data["Date"] >= change_date.strftime("%Y-%m-%d")
         bp_data["Date"] = pd.to_datetime(bp_data["Date"])
         # Add a column to identify the event
         bp_data["Date_num"] = (bp_data["Date"] - bp_data["Date"].min()).dt.days
-        bp_data_after = bp_data[bp_data["Date"] >= change_date_not_str]
-        bp_data_before = bp_data[bp_data["Date"] < change_date_not_str]
+        bp_data_after = bp_data[bp_data["Date"] >= change_date]
+        bp_data_before = bp_data[bp_data["Date"] < change_date]
         plt.figure(figsize=(12, 6))
 
         sns.scatterplot(
@@ -170,7 +171,7 @@ class ActionTrendanderungenMedikation(Action):
         )
 
         # Add vertical line for the event date
-        respective_id = bp_data[bp_data["Date"] <= change_date_not_str].iloc[-1][
+        respective_id = bp_data[bp_data["Date"] <= change_date].iloc[-1][
             "Date_num"
         ]
         plt.axvline(

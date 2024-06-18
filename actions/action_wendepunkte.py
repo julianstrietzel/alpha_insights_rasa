@@ -9,9 +9,10 @@ import seaborn as sns
 import sklearn.linear_model
 from rasa_sdk import Action
 
+from actions import ddp
 from actions.utils import utils
 from actions.utils.db_utils import DBHandler
-from actions.utils.utils import zeitspanne_to_timespan
+from actions.utils.utils import zeitspanne_to_timespan, mehrzahl_zeitspanne
 
 
 class ActionWendepunkte(Action):
@@ -20,7 +21,7 @@ class ActionWendepunkte(Action):
 
     def run(self, dispatcher, tracker, domain):
         (
-            change_date,
+            change_date_parsed,
             diastolic_span,
             pretty_change_date,
             resulti,
@@ -29,6 +30,7 @@ class ActionWendepunkte(Action):
             typ,
             user_id,
             zeitspanne,
+            ref_date_message,
         ) = init_method_run(tracker)
         if typ not in ["systolisch", "diastolisch"]:
             typ = None
@@ -104,7 +106,7 @@ class ActionWendepunkte(Action):
 
             change_dates = [data["recorded_at"].iloc[bkp] for bkp in inflection_result]
             dispatcher.utter_message(
-                f"Die drei signifikanten Wendepunkte im {typ.capitalize()}en Blutdruck liegen am {change_dates[0].strftime('%d. %B %Y')}, {change_dates[1].strftime('%d. %B %Y')} und {change_dates[2].strftime('%d. %B %Y')}:"
+                f"Die drei signifikanten Wendepunkte {ref_date_message} im {typ.capitalize()}en Blutdruck liegen am {change_dates[0].strftime('%d. %B %Y')}, {change_dates[1].strftime('%d. %B %Y')} und {change_dates[2].strftime('%d. %B %Y')}:"
             )
             summary = []
             for i, (segment_data, reg) in enumerate(segments):
@@ -130,16 +132,16 @@ class ActionWendepunkte(Action):
                 )
             for s in summary:
                 dispatcher.utter_message(s)
-            if change_date:
+            if change_date_parsed:
                 respective_id = data[
-                    data["recorded_at"] <= datetime.strptime(change_date, "%Y-%m-%d")
+                    data["recorded_at"] <= pd.to_datetime(change_date_parsed)
                 ].iloc[-1]["idx"]
                 plt.axvline(
                     x=respective_id,
                     color="g",
                     linestyle="--",
                     label="Änderungsdatum"
-                    + f' ({pd.to_datetime(change_date).strftime("%d.%m.%Y")})',
+                    + f' ({change_date_parsed.strftime("%d.%m.%Y")})',
                 )
             filename = str(
                 pathlib.Path().parent.absolute()
@@ -174,11 +176,15 @@ def init_method_run(tracker):
     typ = tracker.get_slot("typ") or None
     zeitspanne = next(tracker.get_latest_entity_values("timespan"), None)
     change_date = tracker.get_slot("change_date") or None
-    pretty_change_date = (
-        pd.to_datetime(change_date).strftime("%d.%m.%Y") if change_date else None
+    change_date_parsed = (
+        ddp.get_date_data(change_date).date_obj if change_date else None
     )
-    since_date = bool(change_date)
+    pretty_change_date = (
+        change_date_parsed.strftime("%d.%m.%Y") if change_date_parsed else None
+    )
+    since_date = bool(change_date_parsed)
     systolic_span, diastolic_span, _ = utils.get_blood_pressure_spans(tracker, user_id)
+    ref_date_message = f"in den letzten 3 {mehrzahl_zeitspanne[zeitspanne] if zeitspanne else 'Monaten'}"
     if zeitspanne:
         timespan = zeitspanne_to_timespan.get(zeitspanne)
         date_filter = (
@@ -187,9 +193,9 @@ def init_method_run(tracker):
     else:
         zeitspanne = tracker.get_slot("timespan") or "Monat"
         timespan = zeitspanne_to_timespan.get(zeitspanne)
-        if change_date:
-            since_date = True
-            date_filter = f"AND CAST(recorded_at AS timestamp) >= '{pd.to_datetime(change_date) - pd.Timedelta(1, 'W')}'"
+        if since_date:
+            date_filter = f"AND CAST(recorded_at AS timestamp) >= '{change_date_parsed - pd.Timedelta(1, 'W')}'"
+            ref_date_message = f"seit dem {pretty_change_date}"
         else:
             date_filter = (
                 f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {timespan}'"
@@ -210,7 +216,7 @@ def init_method_run(tracker):
     resulti = DBHandler().execute_query(query)
 
     return (
-        change_date,
+        change_date_parsed,
         diastolic_span,
         pretty_change_date,
         resulti,
@@ -219,4 +225,5 @@ def init_method_run(tracker):
         typ,
         user_id,
         zeitspanne,
+        ref_date_message,
     )

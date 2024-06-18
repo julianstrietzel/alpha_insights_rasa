@@ -5,6 +5,7 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
+from actions import ddp
 from actions.utils.db_utils import DBHandler
 from actions.utils.utils import (
     get_bp_range,
@@ -34,7 +35,13 @@ class ActionErweiterterBDStatus(Action):
         print(next(tracker.get_latest_entity_values("timespan"), "Fall back"))
         user_id = tracker.get_slot("user_id")
         zeitspanne = tracker.get_slot("timespan") or "Monat"
-        change_date = tracker.get_slot("change_date")
+        change_date = tracker.get_slot("change_date") or None
+        change_date_parsed = (
+            ddp.get_date_data(change_date).date_obj if change_date else None
+        )
+        change_date = (
+            change_date_parsed.strftime("%Y-%m-%d") if change_date_parsed else None
+        )
         timespan = zeitspanne_to_timespan.get(zeitspanne)
         print("tracker timespan", timespan)
         if user_id is None or user_id == "-1":
@@ -53,7 +60,7 @@ class ActionErweiterterBDStatus(Action):
             date_range_message = date_range_message[0].lower() + date_range_message[1:]
         elif change_date:
             date_filter = f"AND CAST(recorded_at AS timestamp) >= '{change_date}'"
-            date_range_message = "seit dem " + change_date
+            date_range_message = "seit dem " + change_date_parsed.strftime("%d.%m.%Y")
         else:
             date_filter = (
                 f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {timespan}'"

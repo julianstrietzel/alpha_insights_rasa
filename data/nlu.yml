@@ -169,12 +169,12 @@ nlu:
       - BD in den letzten [Tagen](timespan)
       - Wie war der Blutdruck
       - Wie hat sich der BD verhalten?
-      - BD seit dem [12. März](change_date)
+      - BD seit [letztem Monat](change_date)
       - BD nach dem [13. August](change_date)
 
   - intent: ablesungen_ausserhalb_zielbereich
     examples: |
-      - Hat der Benutzer in den letzten [Monat](timespan) Ablesungen des [systolischen](type) Blutdrucks [höher](direction) als 130 mmHg gehabt?
+      - Hat der Benutzer in den letzten [Monat](timespan) Ablesungen des [systolischen](type) Blutdrucks [höher](direction) als [130](limit) mmHg gehabt?
       - Können Sie mehr Details zu den Messungen über dem Zielbereich liefern?
       - Könnten Sie die [systolischen](type) Messwerte hervorheben, die [über](direction) dem Zielbereich lagen?
       - Können Sie mehr Informationen zu den [diastolischen](type) Blutdruckmessungen liefern, die den Zielbereich [unterschritten](direction) haben?
@@ -182,10 +182,10 @@ nlu:
       - Gab es [diastolische](type) Messungen, die [unter](direction) dem Zielbereich lagen?
       - Wie viele [systolische](type) Messungen waren [oberhalb](direction) dem Zielbereich?
       - Wie viele [diastolische](type) Messungen waren [niedriger](direction) als der Zielbereich?
-      - Gab es [systolische](type) Messungen, die [unter](direction) dem Korridor lagen?
+      - Gab es [systolische](type) Messungen, die [unter](direction) [80](limit) lagen?
       - Gab es [diastolische](type) Messungen, die [über](direction) dem Zielbereich lagen?
       - Waren die Blutdruckmessungen in den letzten [Monaten](timespan) außerhalb des Ziels?
-      - Haben die Blutdruckwerte in letzter Zeit den Zielbereich überschritten?
+      - Haben die Blutdruckwerte in letzter Zeit [140](limit) überschritten?
       - Gab es hohe systolische Messungen im letzten [Monat](timespan)?
 
   - intent: details_ausreisser
@@ -223,11 +223,11 @@ nlu:
       - Hat sich der [systolische](type) Blutdruck verändert?
       - BD vor und nach dem [12. August](change_date)
       - BD vor dem Medikamentenwechsel
-      - Hat sich der [systolische](type) Blutdruck des Benutzers seit dem [12. Dez](change_date) verändert?
+      - Hat sich der [systolische](type) Blutdruck des Benutzers seit dem [12. Dezember](change_date) verändert?
       - Können Sie eine detaillierte Analyse der Blutdrucktrends des Patienten um den Medikamentenwechsel herum liefern?
       - Welche Schwankungen wurden in den [diastolischen](type) Blutdruckmessungen des Patienten seit der Medikamentenumstellung beobachtet?
       - Signifikante Veränderungen im Blutdruck des Patienten seit Beginn des neuen Medikationsplans am [25.11.2023](change_date)
-      - Wir haben die Medikation am [15. März](change_date) geändert, welchen Einfluss hatte das auf die Blutdruckmessungen?
+      - Wir haben die Medikation am [vor einem Monat](change_date) geändert, welchen Einfluss hatte das auf die Blutdruckmessungen?
       - Vergleiche die Blutdruckwerte vor und nach dem [12. Juni](change_date)
       - Veränderungen im Blutdruck um den [6. Dezember](change_date)
       - Auswirkungen des Medikamentenwechsels auf den Blutdruck
@@ -238,6 +238,9 @@ nlu:
       - [12. März](change_date)
       - [25.11.2023](change_date)
       - [2024-05-18](change_date)
+      - [letztes Jahr](change_date)
+      - Wir haben die Medikation am [15. März](change_date) geändert
+      - Wir hatten [vor drei Monaten](change_date) eine Medikamentenumstellung. Wie hat sich der Blutdruck des Patienten seitdem verändert?
       - Trendänderungen nach dem Medikamentenwechsel
 
   - intent: trends
@@ -250,7 +253,9 @@ nlu:
       - Veränderungen im [diastolischen](type) Blutdruck 
       - Wie haben sich die Blutdruckwerte des Patienten in den letzten [Tagen](timespan) verändert?
       - Welche Trends sind in den Blutdruckmessungen des Patienten in den letzten [Monaten](timespan) zu erkennen?
-      - trends
+      - trends 
+      - trends seit [letztem Jahr](change_date)
+      - BP trends seit dem [12. März](change_date)
 
 
 

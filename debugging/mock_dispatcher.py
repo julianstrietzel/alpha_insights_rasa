@@ -4,7 +4,7 @@ from typing import Optional, Text, Any
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
-from actions.action_trendaenderungen_medikation import ActionTrendanderungenMedikation
+from actions.action_wendepunkte import ActionWendepunkte
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -46,7 +46,7 @@ class TestClient:
         return dispatcher.messages, slots
 
 
-client = TestClient(ActionTrendanderungenMedikation())
+client = TestClient(ActionWendepunkte())
 
 messages, slots = client.invoke_message(
     None,
@@ -61,9 +61,9 @@ messages, slots = client.invoke_message(
         "birthday": "2020-01-01",
         "sex": "FEMALE",
         "medical_preconditions": "",
-        "timespan": "Woche",
+        "timespan": "Jahr",
         "typ": "systolisch",
-        "change_date": "2024-04-01",
+        "change_date": "April",
     },
 )
 print("Messages from dispatcher:\n")

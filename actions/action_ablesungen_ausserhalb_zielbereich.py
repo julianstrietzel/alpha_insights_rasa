@@ -7,6 +7,7 @@ import pandas as pd
 import seaborn as sns
 from rasa_sdk import Action
 
+from actions import ddp
 from actions.utils.db_utils import DBHandler
 from actions.utils.utils import (
     get_blood_pressure_spans,
@@ -25,15 +26,18 @@ class ActionAblesungenAusserhalbZielbereich(Action):
         user_id = tracker.get_slot("user_id")
         zeitspanne = tracker.get_slot("timespan") or "Monat"
         zeitspanne_entity = next(tracker.get_latest_entity_values("timespan"), None)
-        change_date = tracker.get_slot("change_date") or None
+        change_date_input = tracker.get_slot("change_date") or None
         direction = tracker.get_slot("direction") or "über"
         typ = tracker.get_slot("type") or None
         limit = tracker.get_slot("limit") or None
+        change_date_parsed = (
+            ddp.get_date_data(change_date_input).date_obj if change_date_input else None
+        )
 
         if zeitspanne_entity:
             date_filter = f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {zeitspanne_to_timespan[zeitspanne_entity]}'"
-        elif change_date:
-            date_filter = f"AND CAST(recorded_at AS timestamp) >= '{change_date}'"
+        elif change_date_parsed:
+            date_filter = f"AND CAST(recorded_at AS timestamp) >= '{change_date_parsed.strftime('%Y-%m-%d')}'"
         else:
             date_filter = f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {zeitspanne_to_timespan[zeitspanne]}'"
         query = f"""
@@ -75,8 +79,8 @@ class ActionAblesungenAusserhalbZielbereich(Action):
                     f"Von den {count_bp_measurements} Blutdruckmessungen "
                     + (
                         f"in den letzten 3 {mehrzahl_zeitspanne[zeitspanne]}"
-                        if not change_date
-                        else ("seit dem " + change_date)
+                        if not change_date_parsed
+                        else ("seit dem " + change_date_parsed.strftime("%d.%m.%Y"))
                     )
                     + " liegen "
                     + str(len(of_range_bp_measurements))
