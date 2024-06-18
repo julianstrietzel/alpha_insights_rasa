@@ -27,7 +27,10 @@ def send_message():
         st.session_state.messages.append({"sender": "You", "message": user_message})
         responses = get_bot_response(user_message)
         for response in responses:
-            st.session_state.messages.append({"sender": "Bot", "message": response.get("text", "").replace('\n', '<br>')})
+            if "image" in response:
+                st.session_state.messages.append({"sender": "Bot", "image": response["image"]})
+            else:
+                st.session_state.messages.append({"sender": "Bot", "message": response.get("text", "").replace('\n', '<br>')})
         st.session_state.user_message = ""
 
 st.markdown("""
@@ -64,12 +67,15 @@ for msg in st.session_state.messages:
             unsafe_allow_html=True,
         )
     else:
-        st.markdown(
-            '<div class="chat-container"><div class="chat-bubble bot-bubble"><pre>{}</pre></div></div>'.format(
-                msg["message"].replace("\n", "<br>")
-            ),
-            unsafe_allow_html=True,
-        )
+        if "image" in msg:
+            st.image(msg["image"])
+        else:
+            st.markdown(
+                '<div class="chat-container"><div class="chat-bubble bot-bubble"><pre>{}</pre></div></div>'.format(
+                    msg["message"].replace("\n", "<br>")
+                ),
+                unsafe_allow_html=True,
+            )
 
 st.text_input("You: ", key="user_message", on_change=send_message)
 
