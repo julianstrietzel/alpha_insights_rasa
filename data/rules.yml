@@ -1,6 +1,10 @@
 version: "3.1"
 
 rules:
+  - rule: Fallback rule forwarding to LLM
+    steps:
+      - intent: nlu_fallback
+      - action: action_defog_fallback
   - rule: Bot challenge
     steps:
       - intent: einleitung_bot_herausforderung

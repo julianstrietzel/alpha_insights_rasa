@@ -4,7 +4,7 @@ from typing import Optional, Text, Any
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
-from actions.action_wendepunkte import ActionWendepunkte
+from actions.action_defog_fallback import ActionDefogFallback
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -26,7 +26,7 @@ class TestClient:
     def __init__(self, action: Action):
         self.action = action
 
-    def invoke_message(self, message, slots):
+    async def invoke_message(self, message, slots):
         dispatcher = MockDispatcher()
 
         tracker = Tracker(
@@ -42,30 +42,40 @@ class TestClient:
 
         domain = {}
 
-        slots = self.action.run(dispatcher=dispatcher, tracker=tracker, domain=domain)
+        slots = await self.action.run(
+            dispatcher=dispatcher, tracker=tracker, domain=domain
+        )
         return dispatcher.messages, slots
 
 
-client = TestClient(ActionWendepunkte())
+async def main():
 
-messages, slots = client.invoke_message(
-    None,
-    slots={
-        "health": "good",
-        "geo": "9384z5bj",
-        "user_id": "25601",
-        "nickname": "testuser",
-        "title": "testtitle",
-        "home_longitude": "0.0",
-        "home_latitude": "0.0",
-        "birthday": "2020-01-01",
-        "sex": "FEMALE",
-        "medical_preconditions": "",
-        "timespan": "Jahr",
-        "typ": "systolisch",
-        "change_date": "April",
-    },
-)
-print("Messages from dispatcher:\n")
-for message in messages:
-    print(str(message).strip())
+    client = TestClient(ActionDefogFallback())
+
+    messages, slots = await client.invoke_message(
+        {"text": "Was ist der maximale Blutdruck von unserem nutzer?"},
+        slots={
+            "health": "good",
+            "geo": "9384z5bj",
+            "user_id": "25601",
+            "nickname": "testuser",
+            "title": "testtitle",
+            "home_longitude": "0.0",
+            "home_latitude": "0.0",
+            "birthday": "2020-01-01",
+            "sex": "FEMALE",
+            "medical_preconditions": "",
+            "timespan": "Jahr",
+            "typ": "systolisch",
+            "change_date": "April",
+        },
+    )
+    print("Messages from dispatcher:\n")
+    for message in messages:
+        print(str(message).strip())
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(main())

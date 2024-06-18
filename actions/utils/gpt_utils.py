@@ -1,21 +1,16 @@
 import json
-import os
 
 from openai import OpenAI
 from openai.lib.streaming import AssistantEventHandler
 
 from actions.utils.db_utils import DBHandler, database_schema
 
-api_key = os.environ.get("OPENAI_API_KEY")
-
 
 class GPTHandler:
 
     def __init__(self, basic_information: str = ""):
         # TODO if handed over a thread id this should not create but get the thread to continue even if multiple sessions are up
-        self.client = OpenAI(
-            api_key=api_key,
-        )
+        self.client = OpenAI()
         self.thread = self.client.beta.threads.create()
         self.assistant = self.client.beta.assistants.create(
             name="PostgresSQL Data Extractor",

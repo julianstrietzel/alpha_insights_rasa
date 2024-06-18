@@ -151,5 +151,7 @@ actions:
   - action_wendepunkte
   - action_trendaenderungen_medikation
   - action_trends
+  - action_gpt_fallback
   - action_veraenderungen_ueber_tag
+  - action_defog_fallback
 

@@ -34,8 +34,7 @@ class ActionGrundInfo(Action):
             if patient_details:
                 systolic_range, diastolic_range = get_bp_range(
                     patient_details["birthday"],
-                    patient_details["medical_preconditions"]
-                    != "",  # TODO check if this works
+                    (patient_details["medical_preconditions"] not in ["", None]),
                 )
                 query = f"""
                     SELECT

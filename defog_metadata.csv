@@ -1,0 +1,30 @@
+column_name,data_type,column_description,table_name
+id,bigint,,geo_location
+longitude,real,,geo_location
+acquired_at,character varying,,geo_location
+geo_fence_status,character varying,"Possible values: ACCURACY_NEEDS_REFINEMENT, ESTIMATED_MEASURE_TO_BE_IGNORED, GEOFENCE_DISABLED, IN, OLD_MEASURE_TO_BE_IGNORED, OUT, UNKNOWN",geo_location
+connected_to_trusted_wifi,boolean,,geo_location
+source_of_geolocation,character varying,"Possible values: ALMAPHIL, GOOGLE, HERE",geo_location
+latitude,real,,geo_location
+recorded_at,character varying,,geo_location
+accuracy,real,,geo_location
+geofence_detailed_status,character varying,"Possible values: IN_GEOFENCE, JUST_LEFT_GEOFENCE, OUTSIDE_GEOFENCE, RETURNED_TO_GEOFENCE, STILL_JUST_LEFT_GEOFENCE",geo_location
+just_left_geofence_time,character varying,,geo_location
+user_id,bigint,,geo_location
+id,bigint,,patient
+health,character varying,"Possible values: high, low, medium",patient
+geo,character varying,Possible values: medium,patient
+user_id,bigint,,patient
+nickname,character varying,"Possible values: Alex, Emily, Lea",patient
+title,character varying,,patient
+home_longitude,real,,patient
+home_latitude,real,,patient
+birthday,character varying,,patient
+sex,character varying,"Possible values: FEMALE, MALE",patient
+medical_preconditions,character varying,Possible values: Amputiertes Bein,patient
+id,bigint,Unique identifier for each blood pressure record,bloodpressure
+systolic,integer,Systolic blood pressure value in mmHg,bloodpressure
+diastolic,integer,Diastolic blood pressure value in mmHg,bloodpressure
+pulse,integer,Pulse rate in beats per minute,bloodpressure
+recorded_at,character varying,Date and time when the blood pressure was recorded,bloodpressure
+user_id,bigint,Identifier for the user who recorded the blood pressure,bloodpressure

@@ -1,5 +1,5 @@
 openai
-rasa~=3.6.2
+rasa
 streamlit
 requests
 seaborn
@@ -8,3 +8,4 @@ matplotlib
 ruptures
 scikit-learn
 dateparser
+defog[portgres]
