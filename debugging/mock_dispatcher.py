@@ -4,8 +4,7 @@ from typing import Optional, Text, Any
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
-from actions.action_details_ausreisser import ActionDetailsAusreisser
-from actions.action_wendepunkte import ActionWendepunkte
+from actions.action_trendaenderungen_medikation import ActionTrendanderungenMedikation
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -47,7 +46,7 @@ class TestClient:
         return dispatcher.messages, slots
 
 
-client = TestClient(ActionWendepunkte())
+client = TestClient(ActionTrendanderungenMedikation())
 
 messages, slots = client.invoke_message(
     None,

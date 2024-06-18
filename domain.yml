@@ -16,12 +16,16 @@ intents:
 
 responses:
   utter_bot_challenge:
-    - text: "Dieser ChatBot wurde entwickelt, um eine Vielzahl von Anfragen im Zusammenhang mit den Blutdruckwerten des Patienten zu beantworten. Er verwendet verfügbare Blutdruckdaten, um auf bestimmte Fragen zu den neuesten Messwerten des Patienten, Messwerten über einen bestimmten Zeitraum, Schwankungen und Trends seit Änderungen der Medikation und mehr zu reagieren. Er kann detaillierte Analysen und Visualisierungen liefern, die zu einem umfassenderen Verständnis der Gesundheit des Patienten beitragen.
-    Bitte fahren Sie fort, indem Sie Ihre Frage stellen.
-    Mögliche Fragen sind u.a.:
-    'Welche waren meine höchsten und niedrigsten Messwerte im letzten Monat?'
-    'Können Sie mehr Details zu den Messungen über dem Zielbereich liefern?'
-    'Hat sich der Blutdruck des Benutzers seit dem 12. Dezember verändert?'"
+    - text: "Dieser ChatBot wurde entwickelt, um eine Vielzahl von Anfragen im Zusammenhang mit den Blutdruckwerten des 
+    Patienten zu beantworten. Er verwendet verfügbare Blutdruckdaten, um auf bestimmte Fragen zu den neuesten Messwerten 
+    des Patienten, Messwerten über einen bestimmten Zeitraum, Schwankungen und Trends seit Änderungen der Medikation 
+    und mehr zu reagieren. Er kann detaillierte Analysen und Visualisierungen liefern, die zu einem umfassenderen 
+    Verständnis der Gesundheit des Patienten beitragen.\n
+    Bitte fahren Sie fort, indem Sie Ihre Frage stellen.\n
+    Mögliche Fragen sind u.a.:\
+    'Welche waren meine höchsten und niedrigsten Messwerte im letzten Monat?'\n
+    'Können Sie mehr Details zu den Messungen über dem Zielbereich liefern?'\n
+    'Hat sich der Blutdruck des Benutzers seit dem 12. Dezember verändert?'\n"
 
 
   utter_ask_user_id:
@@ -43,8 +47,8 @@ entities:
       influence_conversation: false
   - direction:
       influence_conversation: false
-  #- limit:
-  #    influence_conversation: false
+  - limit:
+      influence_conversation: false
   - change_date: # date of change in medication
       influence_conversation: false
   - timespan:
@@ -63,22 +67,23 @@ slots:
     mappings:
       - type: from_entity
         entity: direction
-  #  limit:
-  #    type: text
-  #    influence_conversation: false
-  #    mappings:
-  #      - type: from_entity
-  #        entity: limit
+  limit:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: limit
   change_date:
     type: text
     influence_conversation: false
+    initial_value: "2024-05-23"
     mappings:
       - type: from_entity
         entity: change_date
   timespan: # should be Tag, Woche, Monat, Jahr (english)
     type: text
     influence_conversation: false
-    initial_value: "Month"
+    initial_value: "Monat"
     mappings:
       - type: from_entity
         entity: timespan

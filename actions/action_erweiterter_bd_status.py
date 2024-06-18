@@ -6,7 +6,13 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
 from actions.utils.db_utils import DBHandler
-from actions.utils.utils import get_bp_range, get_patient_details, calculate_percentages
+from actions.utils.utils import (
+    get_bp_range,
+    get_patient_details,
+    calculate_percentages,
+    zeitspanne_to_timespan,
+    at_the_last_prefix,
+)
 
 
 class ActionErweiterterBDStatus(Action):
@@ -27,8 +33,9 @@ class ActionErweiterterBDStatus(Action):
         print(tracker.latest_message)
         print(next(tracker.get_latest_entity_values("timespan"), "Fall back"))
         user_id = tracker.get_slot("user_id")
-        timespan = tracker.get_slot("timespan") or "Month"
+        zeitspanne = tracker.get_slot("timespan") or "Monat"
         change_date = tracker.get_slot("change_date")
+        timespan = zeitspanne_to_timespan.get(zeitspanne)
         print("tracker timespan", timespan)
         if user_id is None or user_id == "-1":
             dispatcher.utter_message("Bitte geben Sie eine Benutzer-ID an.")
@@ -42,12 +49,17 @@ class ActionErweiterterBDStatus(Action):
             date_filter = (
                 f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {timespan}'"
             )
+            date_range_message = at_the_last_prefix.get(zeitspanne)
+            date_range_message = date_range_message[0].lower() + date_range_message[1:]
         elif change_date:
             date_filter = f"AND CAST(recorded_at AS timestamp) >= '{change_date}'"
+            date_range_message = "seit dem " + change_date
         else:
             date_filter = (
                 f"AND CAST(recorded_at AS timestamp) >= NOW() - INTERVAL '3 {timespan}'"
             )
+            date_range_message = at_the_last_prefix.get(zeitspanne)
+            date_range_message = date_range_message[0].lower() + date_range_message[1:]
 
         query = f"""
                 SELECT
@@ -110,7 +122,7 @@ class ActionErweiterterBDStatus(Action):
         ) = calculate_percentages(diastolic_values, diastolic_range)
 
         dispatcher.utter_message(
-            f"Die {len(results)} Blutdruckmessungen lagen zwischen {systolic_min}/{diastolic_min} mmHg und {systolic_max}/{diastolic_max} mmHg "
+            f"Die {len(results)} Blutdruckmessungen {date_range_message} lagen zwischen {systolic_min}/{diastolic_min} mmHg und {systolic_max}/{diastolic_max} mmHg "
             f"und hatten einen Durchschnitt von {systolic_avg:.1f}/{diastolic_avg:.1f} mmHg.\n\n"
         )
         # more above than below then string erhöht vs verringert if in_range percent is below 70 stark otherwise leicht

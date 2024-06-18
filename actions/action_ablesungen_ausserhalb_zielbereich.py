@@ -27,7 +27,7 @@ class ActionAblesungenAusserhalbZielbereich(Action):
         zeitspanne_entity = next(tracker.get_latest_entity_values("timespan"), None)
         change_date = tracker.get_slot("change_date") or None
         direction = tracker.get_slot("direction") or "über"
-        typ = tracker.get_slot("typ") or None
+        typ = tracker.get_slot("type") or None
         limit = tracker.get_slot("limit") or None
 
         if zeitspanne_entity:

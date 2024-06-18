@@ -54,7 +54,7 @@ nlu:
       - unter der Grenze
       - unter dem Grenzwert
 
-  - synonym: Year
+  - synonym: Jahr
     examples: |
       - Jahren
       - Jahre
@@ -64,7 +64,7 @@ nlu:
       - Jahr
       - Jahre hinweg
 
-  - synonym: Month
+  - synonym: Monat
     examples: |
       - Monat
       - Monaten
@@ -74,7 +74,7 @@ nlu:
       - letzten Monat
       - in den letzten Monaten
 
-  - synonym: Week
+  - synonym: Woche
     examples: |
       - Woche
       - Wochen
@@ -84,7 +84,7 @@ nlu:
       - letzten Wochen
       - in den letzten Wochen
 
-  - synonym: Day
+  - synonym: Tag
     examples: |
       - Tag
       - Tage
@@ -237,6 +237,7 @@ nlu:
       - [13. August](change_date) 
       - [12. März](change_date)
       - [25.11.2023](change_date)
+      - [2024-05-18](change_date)
       - Trendänderungen nach dem Medikamentenwechsel
 
   - intent: trends

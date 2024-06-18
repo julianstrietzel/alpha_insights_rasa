@@ -62,7 +62,7 @@ def get_patient_details(user_id: str, force_reload=False, tracker=None) -> dict:
 
 
 def calculate_percentages(readings, bp_range):
-    if not readings:
+    if len(readings) == 0 or bp_range == (0, 0):
         return 0, 0, 0
     below_range = len([x for x in readings if x < bp_range[0]])
     in_range = len([x for x in readings if bp_range[0] <= x <= bp_range[1]])
