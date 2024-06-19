@@ -133,10 +133,13 @@ from sklearn.linear_model import LinearRegression
 def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
     trend_messages = []
     months = bp_data["Month"].unique()
+    bp_data["Month_Year"] = bp_data["Datum"].dt.strftime("%Y-%m")
+    month_and_years = bp_data["Month_Year"].unique()
     previous_month_values = None
-
-    for month in sorted(months):
-        month_data = bp_data[bp_data["Month"] == month]
+    # only the last three analyzed
+    month_and_years = sorted(month_and_years)[-4:]
+    for month_and_year in month_and_years:
+        month_data = bp_data[bp_data["Month_Year"] == month_and_year]
         year = month_data["Datum"].dt.strftime("%Y").iloc[0]
         month_id = month_data["Datum"].dt.strftime("%m").iloc[0]
         monat = month_to_german[month_id]
@@ -197,8 +200,6 @@ def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
         else:
             systolic_within_arrow = diastolic_within_arrow = systolic_below_arrow = diastolic_below_arrow = systolic_above_arrow = diastolic_above_arrow = ""
 
-        # Update previous month values
-        previous_month_values = (systolic_within_target, diastolic_within_target, systolic_below_target, diastolic_below_target, systolic_above_target, diastolic_above_target)
 
         message = (
             f"Blutdrucktrends für {monat} {year}:\n\n"
@@ -207,11 +208,14 @@ def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
             f"und hatte einen Durchschnitt von {pulse_avg:.0f} bpm.\n\n"
             f"-\tInnerhalb des Ziels:\t{systolic_within_target:.0f}%{systolic_within_arrow} (systolisch),\t{diastolic_within_target:.0f}%{diastolic_within_arrow} (diastolisch)\n"
             f"-\tUnterhalb des Ziels:\t{systolic_below_target:.0f}%{systolic_below_arrow} (systolisch),\t{diastolic_below_target:.0f}%{diastolic_below_arrow} (diastolisch)\n"
-            f"-\tÜber dem Ziel:\t\t{systolic_above_target:.0f}%{systolic_above_arrow} (systolisch),\t\t{diastolic_above_target:.0f}%{diastolic_above_arrow} (diastolisch)\n\n"
+            f"-\tÜber dem Ziel:\t\t\t{systolic_above_target:.0f}%{systolic_above_arrow} (systolisch),\t\t{diastolic_above_target:.0f}%{diastolic_above_arrow} (diastolisch)\n\n"
             f"Der {monat} zeigt einen {systolic_trend} im systolischen Blutdruck von {systolic_start:.1f} bis {systolic_end:.1f} mmHg "
             f"und einen {diastolic_trend} im diastolischen Blutdruck von {diastolic_start:.1f} bis {diastolic_end:.1f} mmHg."
         )
 
-        trend_messages.append(message)
+        if previous_month_values:
+            trend_messages.append(message)
+        # Update previous month values
+        previous_month_values = (systolic_within_target, diastolic_within_target, systolic_below_target, diastolic_below_target, systolic_above_target, diastolic_above_target)
 
     return trend_messages
