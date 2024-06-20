@@ -4,7 +4,7 @@ from typing import Optional, Text, Any
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
-from actions.action_defog_fallback import ActionDefogFallback
+from actions.action_veraenderungen_ueber_tag import ActionVeraenderungUeberTag
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -42,7 +42,7 @@ class TestClient:
 
         domain = {}
 
-        slots = await self.action.run(
+        slots = self.action.run(
             dispatcher=dispatcher, tracker=tracker, domain=domain
         )
         return dispatcher.messages, slots
@@ -50,7 +50,7 @@ class TestClient:
 
 async def main():
 
-    client = TestClient(ActionDefogFallback())
+    client = TestClient(ActionVeraenderungUeberTag())
 
     messages, slots = await client.invoke_message(
         {"text": "Was ist der maximale Blutdruck von unserem nutzer?"},

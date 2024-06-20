@@ -1,3 +1,5 @@
+import pathlib
+from datetime import datetime
 from typing import Text
 
 import pandas as pd
@@ -29,8 +31,11 @@ class ActionTrends(Action):
         systolisch_span, diastolic_span = get_bp_range(
             patient_details["birthday"], bool(patient_details["medical_preconditions"])
         )
-        six_months_ago_beginning_of_month = (pd.Timestamp.now() - pd.DateOffset(months=6)).replace(day=1).strftime(
-            "%Y-%m-%d")
+        six_months_ago_beginning_of_month = (
+            (pd.Timestamp.now() - pd.DateOffset(months=6))
+            .replace(day=1)
+            .strftime("%Y-%m-%d")
+        )
         query = f"""
                 SELECT
                     systolic,
@@ -52,29 +57,51 @@ class ActionTrends(Action):
         bp_data["Datum"] = pd.to_datetime(bp_data["Datum"])
         bp_data["Datum_num"] = (bp_data["Datum"] - bp_data["Datum"].min()).dt.days
         bp_data["Month"] = bp_data["Datum"].dt.month
-        bp_data["Monthly_average_systolic"] = bp_data.groupby("Month")["Systolisch"].transform("mean")
-        bp_data["Monthly_average_diastolic"] = bp_data.groupby("Month")["Diastolisch"].transform("mean")
+        bp_data["Monthly_average_systolic"] = bp_data.groupby("Month")[
+            "Systolisch"
+        ].transform("mean")
+        bp_data["Monthly_average_diastolic"] = bp_data.groupby("Month")[
+            "Diastolisch"
+        ].transform("mean")
 
         plt.figure(figsize=(12, 8))
 
         # Scatter plot for Systolisch
-        sns.scatterplot(data=bp_data, x='Datum_num', y='Systolisch', color="red", legend=False)
+        sns.scatterplot(
+            data=bp_data, x="Datum_num", y="Systolisch", color="red", legend=False
+        )
 
         # Regression lines for Systolisch by month
         first = True
-        for month, group in bp_data.groupby('Month'):
-            sns.regplot(data=group, x='Datum_num', y='Systolisch', scatter=False,
-                        label=f'Systolische Trends' if first else "", truncate=True, color='r')
+        for month, group in bp_data.groupby("Month"):
+            sns.regplot(
+                data=group,
+                x="Datum_num",
+                y="Systolisch",
+                scatter=False,
+                label=f"Systolische Trends" if first else "",
+                truncate=True,
+                color="r",
+            )
             first = False
 
         # Scatter plot for Diastolic
-        sns.scatterplot(data=bp_data, x='Datum_num', y='Diastolisch', color='b', legend=False)
+        sns.scatterplot(
+            data=bp_data, x="Datum_num", y="Diastolisch", color="blue", legend=False
+        )
 
         # Regression lines for Diastolic by month
         first = True
-        for month, group in bp_data.groupby('Month'):
-            sns.regplot(data=group, x='Datum_num', y='Diastolisch', scatter=False,
-                        label=f'Diastolische Trends' if first else "", truncate=True, color='b')
+        for month, group in bp_data.groupby("Month"):
+            sns.regplot(
+                data=group,
+                x="Datum_num",
+                y="Diastolisch",
+                scatter=False,
+                label=f"Diastolische Trends" if first else "",
+                truncate=True,
+                color="b",
+            )
             first = False
 
         # Add vertical line for the event date
@@ -86,22 +113,25 @@ class ActionTrends(Action):
                 x=respective_id,
                 color="black",
                 linestyle="--",
-                label="Änderungsdatum" + f" ({change_date_parsed.strftime('%d.%m.%Y')})",
+                label="Änderungsdatum"
+                + f" ({change_date_parsed.strftime('%d.%m.%Y')})",
                 linewidth=1,
             )
 
         # Add target coridors for systolic and diastolic
         plt.axhspan(
-            diastolic_span[0], diastolic_span[1], color="green", alpha=0.1, label="Normalbereiche"
+            diastolic_span[0],
+            diastolic_span[1],
+            color="green",
+            alpha=0.1,
+            label="Normalbereiche",
         )
-        plt.axhspan(
-            systolisch_span[0], systolisch_span[1], color="green", alpha=0.1
-        )
+        plt.axhspan(systolisch_span[0], systolisch_span[1], color="green", alpha=0.1)
 
         # Add titles and labels
-        plt.title('Blutdruckentwicklung der letzten 6 Monate')
-        plt.xlabel('Datum')
-        plt.ylabel('Blutdruck Diastolisch und Systolisch (mmHg)')
+        plt.title("Blutdruckentwicklung der letzten 6 Monate")
+        plt.xlabel("Datum")
+        plt.ylabel("Blutdruck Diastolisch und Systolisch (mmHg)")
         plt.legend()
 
         # Add x-axis labels
@@ -109,8 +139,8 @@ class ActionTrends(Action):
         # pretty date labels month and year
         xlabels = bp_data["Datum"].dt.strftime("%b %Y")
         # Filter always first appearing date of month if available otherwise next larger
-        xticks = xticks[~xlabels.duplicated(keep='first')]
-        xlabels = xlabels[~xlabels.duplicated(keep='first')]
+        xticks = xticks[~xlabels.duplicated(keep="first")]
+        xlabels = xlabels[~xlabels.duplicated(keep="first")]
         plt.xticks(
             ticks=xticks,
             labels=xlabels,
@@ -119,16 +149,24 @@ class ActionTrends(Action):
 
         # Display the plot
         plt.tight_layout()
-        plt.show()
+        filename = str(
+            pathlib.Path().parent.absolute()
+            / f"tmp_{user_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_trends.png"
+        )
+        plt.savefig(filename)
 
-        trend_messages = generate_trend_messages(bp_data, systolisch_span, diastolic_span)
+        trend_messages = generate_trend_messages(
+            bp_data, systolisch_span, diastolic_span
+        )
         for message in trend_messages:
             dispatcher.utter_message(message)
+        dispatcher.utter_message(image=filename)
 
         return []
 
 
 from sklearn.linear_model import LinearRegression
+
 
 def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
     trend_messages = []
@@ -153,25 +191,51 @@ def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
         pulse_max = month_data["Puls"].max()
         pulse_avg = month_data["Puls"].mean()
 
-        systolic_within_target = month_data[(month_data["Systolisch"] >= systolisch_span[0]) & (
-                month_data["Systolisch"] <= systolisch_span[1])].shape[0] / month_data.shape[0] * 100
-        systolic_below_target = month_data[month_data["Systolisch"] < systolisch_span[0]].shape[0] / month_data.shape[
-            0] * 100
-        systolic_above_target = month_data[month_data["Systolisch"] > systolisch_span[1]].shape[0] / month_data.shape[
-            0] * 100
+        systolic_within_target = (
+            month_data[
+                (month_data["Systolisch"] >= systolisch_span[0])
+                & (month_data["Systolisch"] <= systolisch_span[1])
+            ].shape[0]
+            / month_data.shape[0]
+            * 100
+        )
+        systolic_below_target = (
+            month_data[month_data["Systolisch"] < systolisch_span[0]].shape[0]
+            / month_data.shape[0]
+            * 100
+        )
+        systolic_above_target = (
+            month_data[month_data["Systolisch"] > systolisch_span[1]].shape[0]
+            / month_data.shape[0]
+            * 100
+        )
 
-        diastolic_within_target = month_data[(month_data["Diastolisch"] >= diastolic_span[0]) & (
-                month_data["Diastolisch"] <= diastolic_span[1])].shape[0] / month_data.shape[0] * 100
-        diastolic_below_target = month_data[month_data["Diastolisch"] < diastolic_span[0]].shape[0] / month_data.shape[
-            0] * 100
-        diastolic_above_target = month_data[month_data["Diastolisch"] > diastolic_span[1]].shape[0] / month_data.shape[
-            0] * 100
+        diastolic_within_target = (
+            month_data[
+                (month_data["Diastolisch"] >= diastolic_span[0])
+                & (month_data["Diastolisch"] <= diastolic_span[1])
+            ].shape[0]
+            / month_data.shape[0]
+            * 100
+        )
+        diastolic_below_target = (
+            month_data[month_data["Diastolisch"] < diastolic_span[0]].shape[0]
+            / month_data.shape[0]
+            * 100
+        )
+        diastolic_above_target = (
+            month_data[month_data["Diastolisch"] > diastolic_span[1]].shape[0]
+            / month_data.shape[0]
+            * 100
+        )
 
         # Perform linear regression for systolic trend
         X_systolic = month_data["Datum_num"].values.reshape(-1, 1)
         y_systolic = month_data["Systolisch"].values
         systolic_model = LinearRegression().fit(X_systolic, y_systolic)
-        systolic_trend = "Aufwärtstrend" if systolic_model.coef_[0] > 0 else "Abwärtstrend"
+        systolic_trend = (
+            "Aufwärtstrend" if systolic_model.coef_[0] > 0 else "Abwärtstrend"
+        )
 
         # Calculate systolic regression start and end values
         systolic_start = systolic_model.predict([[X_systolic.min()]])[0]
@@ -181,7 +245,9 @@ def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
         X_diastolic = month_data["Datum_num"].values.reshape(-1, 1)
         y_diastolic = month_data["Diastolisch"].values
         diastolic_model = LinearRegression().fit(X_diastolic, y_diastolic)
-        diastolic_trend = "Aufwärtstrend" if diastolic_model.coef_[0] > 0 else "Abwärtstrend"
+        diastolic_trend = (
+            "Aufwärtstrend" if diastolic_model.coef_[0] > 0 else "Abwärtstrend"
+        )
 
         # Calculate diastolic regression start and end values
         diastolic_start = diastolic_model.predict([[X_diastolic.min()]])[0]
@@ -189,17 +255,37 @@ def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
 
         # Compare with previous month
         if previous_month_values:
-            prev_systolic_within_target, prev_diastolic_within_target, prev_systolic_below_target, prev_diastolic_below_target, prev_systolic_above_target, prev_diastolic_above_target = previous_month_values
+            (
+                prev_systolic_within_target,
+                prev_diastolic_within_target,
+                prev_systolic_below_target,
+                prev_diastolic_below_target,
+                prev_systolic_above_target,
+                prev_diastolic_above_target,
+            ) = previous_month_values
 
-            systolic_within_arrow = "↑" if systolic_within_target > prev_systolic_within_target else "↓"
-            diastolic_within_arrow = "↑" if diastolic_within_target > prev_diastolic_within_target else "↓"
-            systolic_below_arrow = "↑" if systolic_below_target > prev_systolic_below_target else "↓"
-            diastolic_below_arrow = "↑" if diastolic_below_target > prev_diastolic_below_target else "↓"
-            systolic_above_arrow = "↑" if systolic_above_target > prev_systolic_above_target else "↓"
-            diastolic_above_arrow = "↑" if diastolic_above_target > prev_diastolic_above_target else "↓"
+            systolic_within_arrow = (
+                "↑" if systolic_within_target > prev_systolic_within_target else "↓"
+            )
+            diastolic_within_arrow = (
+                "↑" if diastolic_within_target > prev_diastolic_within_target else "↓"
+            )
+            systolic_below_arrow = (
+                "↑" if systolic_below_target > prev_systolic_below_target else "↓"
+            )
+            diastolic_below_arrow = (
+                "↑" if diastolic_below_target > prev_diastolic_below_target else "↓"
+            )
+            systolic_above_arrow = (
+                "↑" if systolic_above_target > prev_systolic_above_target else "↓"
+            )
+            diastolic_above_arrow = (
+                "↑" if diastolic_above_target > prev_diastolic_above_target else "↓"
+            )
         else:
-            systolic_within_arrow = diastolic_within_arrow = systolic_below_arrow = diastolic_below_arrow = systolic_above_arrow = diastolic_above_arrow = ""
-
+            systolic_within_arrow = diastolic_within_arrow = systolic_below_arrow = (
+                diastolic_below_arrow
+            ) = systolic_above_arrow = diastolic_above_arrow = ""
 
         message = (
             f"Blutdrucktrends für {monat} {year}:\n\n"
@@ -216,6 +302,13 @@ def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
         if previous_month_values:
             trend_messages.append(message)
         # Update previous month values
-        previous_month_values = (systolic_within_target, diastolic_within_target, systolic_below_target, diastolic_below_target, systolic_above_target, diastolic_above_target)
+        previous_month_values = (
+            systolic_within_target,
+            diastolic_within_target,
+            systolic_below_target,
+            diastolic_below_target,
+            systolic_above_target,
+            diastolic_above_target,
+        )
 
     return trend_messages

@@ -6,7 +6,8 @@ from rasa_sdk import Action
 from actions.utils.utils import (
     get_patient_details,
     get_bp_range,
-    fetch_latest_bp_measurement, is_in_range,
+    fetch_latest_bp_measurement,
+    is_in_range,
 )
 
 
@@ -51,9 +52,7 @@ class ActionAktuellerBDStatus(Action):
         bp_range = get_bp_range(
             patient_details["birthday"], bool(patient_details["medical_preconditions"])
         )
-        in_range = is_in_range(
-            latest_measurement[1], latest_measurement[2], bp_range
-        )
+        in_range = is_in_range(latest_measurement[1], latest_measurement[2], bp_range)
         target_message = (
             "Beide Werte liegen innerhalb"
             if all(in_range)
@@ -88,5 +87,3 @@ class ActionAktuellerBDStatus(Action):
         dispatcher.utter_message(message)
 
         return []
-
-

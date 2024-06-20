@@ -34,9 +34,7 @@ class ActionDefogFallback(Action):
             patient_details["birthday"],
             (patient_details["medical_preconditions"] not in ["", None]),
         )
-        background_info_string_for_llm = (
-            f"Patient Information: {str(patient_details)}"
-        )
+        background_info_string_for_llm = f"Patient Information: {str(patient_details)}"
 
         defog_result = self.defog.ask_query(
             user_input, user_id, background_info_string_for_llm
@@ -51,14 +49,16 @@ class ActionDefogFallback(Action):
         )
         dispatcher.utter_message("Query Result:\n" + pretty_data)
         thread = self.client.beta.threads.create()
-        instructions = (f"You are trying to answer the following question: '{user_input}'\n"
-                        f"You will be provided with data to answer the question."
-                        f"About the following user {patient_details}"
-                        f"'You will be provided with data to answer the question from the database "
-                        f"potentially containing blood pressure and geo location data."
-                        f"Do not use any external sources, only the data provided."
-                        f"Do not mirror the user input or patient details, but provide a "
-                        f"professional and short medical answer.")
+        instructions = (
+            f"You are trying to answer the following question: '{user_input}'\n"
+            f"You will be provided with data to answer the question."
+            f"About the following user {patient_details}"
+            f"'You will be provided with data to answer the question from the database "
+            f"potentially containing blood pressure and geo location data."
+            f"Do not use any external sources, only the data provided."
+            f"Do not mirror the user input or patient details, but provide a "
+            f"professional and short medical answer."
+        )
         assistant = self.client.beta.assistants.create(
             model="gpt-4o",
             instructions=instructions,
@@ -69,9 +69,9 @@ class ActionDefogFallback(Action):
             content="'\nThe result of the SQL query was:\n"
             + pretty_data
             + "\nPlease provide a professional medical answer to the provided question "
-              "earlier based only on the provided data."
-              "KEEP SHORT AND PROFESSIONAL OTHERWISE I'LL GET FIRED. DO NOT MAKE UP ANY UNKNOWN INFORMATION."
-              "Answer in German.",
+            "earlier based only on the provided data."
+            "KEEP SHORT AND PROFESSIONAL OTHERWISE I'LL GET FIRED. DO NOT MAKE UP ANY UNKNOWN INFORMATION."
+            "Answer in German.",
         )
         self.client.beta.threads.runs.create_and_poll(
             thread_id=thread.id, assistant_id=assistant.id

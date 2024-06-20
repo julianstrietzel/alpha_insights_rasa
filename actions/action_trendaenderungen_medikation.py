@@ -25,9 +25,7 @@ class ActionTrendanderungenMedikation(Action):
                 "Bitte geben Sie ein Datum der relevanten Medikationsänderung an."
             )
             return []
-        pretty_change_date = (
-            change_date.strftime("%d.%m.%Y") if change_date else None
-        )
+        pretty_change_date = change_date.strftime("%d.%m.%Y") if change_date else None
         systolic_span, diastolic_span, _ = utils.get_blood_pressure_spans(
             tracker, user_id
         )
@@ -171,9 +169,7 @@ class ActionTrendanderungenMedikation(Action):
         )
 
         # Add vertical line for the event date
-        respective_id = bp_data[bp_data["Date"] <= change_date].iloc[-1][
-            "Date_num"
-        ]
+        respective_id = bp_data[bp_data["Date"] <= change_date].iloc[-1]["Date_num"]
         plt.axvline(
             x=respective_id,
             color="black",
