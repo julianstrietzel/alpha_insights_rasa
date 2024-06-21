@@ -84,14 +84,15 @@ class ActionDetailsAusreisser(Action):
         )
 
         def plot_box_and_outliers(typ=typ):
+            color = "red" if typ=="systolisch" else "blue"
             plt.figure(figsize=(10, 6))
-            sns.boxplot(x=zeitspanne.capitalize(), y=typ.capitalize(), data=df)
+            sns.boxplot(x=zeitspanne.capitalize(), y=typ.capitalize(), data=df, color=color)
             sns.scatterplot(
                 x=zeitspanne.capitalize(),
                 y=typ.capitalize(),
                 data=df[df[f"{typ.capitalize()}e Ausreißer"]],
                 hue="Tageszeit ",
-                palette="rocket",
+                color=color,
             )
             plt.title(
                 f"{typ.capitalize()}er Blutdruck Boxplot nach {zeitspanne.capitalize()}"

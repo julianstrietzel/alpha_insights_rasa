@@ -4,7 +4,7 @@ from typing import Optional, Text, Any
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
-from actions.action_veraenderungen_ueber_tag import ActionVeraenderungUeberTag
+from actions.action_wendepunkte import ActionWendepunkte
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -49,8 +49,8 @@ class TestClient:
 
 
 async def main():
-
-    client = TestClient(ActionVeraenderungUeberTag())
+    action = ActionWendepunkte()
+    client = TestClient(action)
 
     messages, slots = await client.invoke_message(
         {"text": "Was ist der maximale Blutdruck von unserem nutzer?"},
@@ -66,11 +66,11 @@ async def main():
             "sex": "FEMALE",
             "medical_preconditions": "",
             "timespan": "Jahr",
-            "typ": "systolisch",
-            "change_date": "April",
+            "typ": "",
+            "change_date": "Januar",
         },
     )
-    print("Messages from dispatcher:\n")
+    print(f"Messages from action {action.name()}:\n")
     for message in messages:
         print(str(message).strip())
 

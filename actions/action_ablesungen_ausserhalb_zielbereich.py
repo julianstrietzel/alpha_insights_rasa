@@ -164,25 +164,24 @@ class ActionAblesungenAusserhalbZielbereich(Action):
         df = pd.DataFrame(data)
 
         # Create scatter plot using seaborn
-        plt.figure(figsize=(10, 6))
-        scatter_plot = sns.scatterplot(
+        joint_plot = sns.jointplot(
             data=df,
             x="Systolic",
             y="Diastolic",
             hue="Tageszeit",
-            style="Tageszeit",
-            palette="deep",
+            palette="rocket",
+            alpha=0.6,  # Adjust transparency for better visibility
+            marginal_kws=dict(common_norm=False)  # Ensure KDE plots are not normalized together
         )
+
+        # Set the titles and labels
+        joint_plot.set_axis_labels("Systolisch (mmHg)\nBlutdruckmessungen gruppiert nach Tageszeit", "Diastolisch (mmHg)")
+
+        # Adding blood pressure spans to the joint plot
         systolic_span, diastolic_span, _ = get_blood_pressure_spans(tracker, user_id)
-        plt.title("Blutdruckmessungen gruppiert nach Tageszeit")
-        plt.xlabel("Systolisch (mmHg)")
-        plt.ylabel("Diastolisch (mmHg)")
-        plt.axvspan(systolic_span[0], systolic_span[1], color="green", alpha=0.1)
-        print(systolic_span, diastolic_span)
-        plt.axhspan(diastolic_span[0], diastolic_span[1], color="green", alpha=0.1)
-        plt.legend(title="Tageszeit", bbox_to_anchor=(1.05, 1), loc="upper left")
-        plt.grid(True)
-        plt.tight_layout()
+        joint_plot.ax_joint.axvspan(systolic_span[0], systolic_span[1], color="green", alpha=0.1)
+        joint_plot.ax_joint.axhspan(diastolic_span[0], diastolic_span[1], color="green", alpha=0.1)
+
         # plt to image and send
         file_path = str(
             pathlib.Path().parent.absolute()

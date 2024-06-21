@@ -52,12 +52,13 @@ class ActionWendepunkte(Action):
         def analyze_inflection_points(data, typ, span):
             signal = data[typ].values
             data["idx"] = range(len(data))
-
+            color = "red" if typ == "systolisch" else "blue"
             model = "l2"
-            algo = rpt.Dynp(model=model, min_size=7, jump=5).fit(signal)
+            algo = rpt.Dynp(model=model, min_size=10, jump=2).fit(signal)
             inflection_result = algo.predict(n_bkps=3)[:-1]
+            print(typ, inflection_result, signal)
             plt.figure(figsize=(12, 6))
-            sns.scatterplot(data=data, x="idx", y=typ, color="black", label="Messwerte")
+            sns.scatterplot(data=data, x="idx", y=typ, color=color, label="Messwerte")
             segments = []
             prev = 0
             for bkp in inflection_result:
@@ -68,7 +69,7 @@ class ActionWendepunkte(Action):
                 segments.append((segment_data, reg))
                 plt.axvline(
                     x=data["idx"].iloc[bkp],
-                    color="r",
+                    color=color,
                     linestyle="--",
                     label="Wendepunkt" if prev == 0 else None,
                 )
@@ -77,12 +78,12 @@ class ActionWendepunkte(Action):
                     x="idx",
                     y=typ,
                     scatter=False,
-                    color="blue",
+                    color=color,
                     label="Trendlinie" if prev == 0 else None,
                 )
                 prev = bkp
             sns.regplot(
-                data=data.iloc[prev:], x="idx", y=typ, scatter=False, color="blue"
+                data=data.iloc[prev:], x="idx", y=typ, scatter=False, color=color
             )
             segment_data = data.iloc[prev:]
             X = segment_data["recorded_at_ordinal"].values.reshape(-1, 1)
@@ -145,7 +146,7 @@ class ActionWendepunkte(Action):
                 )
             filename = str(
                 pathlib.Path().parent.absolute()
-                / f"tmp_{user_id}_{typ}_wendepunkte_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+                / f"tmp_{user_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{typ}_wendepunkte.png"
             )
             # Adjust x-axis to display datetime values
             ax = plt.gca()

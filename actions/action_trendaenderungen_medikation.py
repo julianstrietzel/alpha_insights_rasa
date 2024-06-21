@@ -60,7 +60,7 @@ class ActionTrendanderungenMedikation(Action):
             y="Systolic",
             hue="Event",
             style="Event",
-            palette="deep",
+            palette="Reds",
             markers=["o"],
             s=20,
             legend=False,
@@ -70,15 +70,15 @@ class ActionTrendanderungenMedikation(Action):
             x="Date_num",
             y="Systolic",
             scatter=False,
-            label="Trend vor Änderung",
-            color="blue",
+            label="Trend Systolisch",
+            color="red",
         )
         sns.regplot(
             data=bp_data[bp_data["Event"] == True],
             x="Date_num",
             y="Systolic",
             scatter=False,
-            label="Trend nach Änderung",
+            label=None,
             color="red",
         )
         sys_avg_before = bp_data_before["Systolic"].mean()
@@ -97,7 +97,7 @@ class ActionTrendanderungenMedikation(Action):
 
         plt.axhline(
             y=sys_avg_before,
-            color="blue",
+            color="red",
             linestyle="--",
             label=f"Sys. Durch. vorher: {sys_avg_before:.1f}",
             alpha=0.5,
@@ -117,7 +117,7 @@ class ActionTrendanderungenMedikation(Action):
             y="Diastolic",
             hue="Event",
             style="Event",
-            palette=["green", "orange"],
+            palette="Blues",
             markers=["o"],
             s=20,
             legend=False,
@@ -127,16 +127,16 @@ class ActionTrendanderungenMedikation(Action):
             x="Date_num",
             y="Diastolic",
             scatter=False,
-            label="Trend vor Änderung",
-            color="green",
+            label="Trend Diastolisch",
+            color="blue",
         )
         sns.regplot(
             data=bp_data[bp_data["Event"] == True],
             x="Date_num",
             y="Diastolic",
             scatter=False,
-            label="Trend nach Änderung",
-            color="orange",
+            label=None,
+            color="blue",
         )
 
         dia_avg_before = bp_data_before["Diastolic"].mean()
@@ -155,14 +155,14 @@ class ActionTrendanderungenMedikation(Action):
 
         plt.axhline(
             y=dia_avg_before,
-            color="green",
+            color="blue",
             linestyle="--",
             label=f"Dias. Durch. vorher: {dia_avg_before:.1f}",
             alpha=0.5,
         )
         plt.axhline(
             y=dia_avg_after,
-            color="orange",
+            color="blue",
             linestyle="--",
             label=f"Dias. Durch. nachher: {dia_avg_after:.1f}",
             alpha=0.5,
