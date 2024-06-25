@@ -188,5 +188,6 @@ class ActionAblesungenAusserhalbZielbereich(Action):
             / ("tmp_scatter_plot_" + str(datetime.now()) + ".png")
         )
         plt.savefig(file_path)
-        dispatcher.utter_message(image=str(file_path))
+        dispatcher.utter_message(image=str(file_path), buttons=[{"title": "Zeig Wendepunkte in den BD Daten. ", "payload": "Veränderungen im Blutdrucktrend in den letzten 3 Monaten."},
+                                                                    {"title": "Details über Ausreißer", "payload": "Haben Sie außergewöhnliche Blutdruckwerte festgestellt?"}])
         return []

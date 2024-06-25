@@ -215,7 +215,21 @@ def init_method_run(tracker):
                 ORDER BY recorded_at ASC
             """
     resulti = DBHandler().execute_query(query)
-
+    dispatcher.utter_message(
+        buttons=[
+            {
+                "title": "Gab es Veränderungen in der Medikation?",
+                "payload": "Hat sich der Blutdruck seit dem Medikamentenwechsel verändert?",
+            },
+            {
+                "title": "Werte außerhalb des Zielkorridors",
+                "payload": "Gab es hohe systolische Messungen im letzten Monat?",
+            },
+            {
+                "title": "Veränderungen über den Tag",
+                "payload": "Wie verhält sich mein Blutdruck über den Tag?",
+            }
+        ])
     return (
         change_date_parsed,
         diastolic_span,

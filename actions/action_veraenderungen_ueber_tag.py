@@ -328,6 +328,20 @@ class ActionVeraenderungUeberTag(Action):
                 "Diastolisch",
             )
         )
+        dispatcher.utter_message(
+            buttons=[
+                {
+                    "title": "Wendepunkte",
+                    "payload": "Wendepunkte in den Blutdruckwerten anzeigen",
+                },{
+                    "title": "Gab es Veränderungen in der Medikation?",
+                    "payload": "Hat sich der Blutdruck seit dem Medikamentenwechsel verändert?",
+                },
+                {
+                    "title": "Werte außerhalb des Zielkorridors",
+                    "payload": "Gab es hohe systolische Messungen im letzten Monat?",
+                }
+            ])
         return []
 
     def preprocess_bp_data(self, query):

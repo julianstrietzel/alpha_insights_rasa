@@ -161,7 +161,21 @@ class ActionTrends(Action):
         for message in trend_messages:
             dispatcher.utter_message(message)
         dispatcher.utter_message(image=filename)
-
+        dispatcher.utter_message(
+            buttons=[
+                {
+                    "title": "Gab es Veränderungen in der Medikation?",
+                    "payload": "Hat sich der Blutdruck seit dem Medikamentenwechsel verändert?",
+                },
+                {
+                    "title": "Werte außerhalb des Zielkorridors",
+                    "payload": "Gab es hohe systolische Messungen im letzten Monat?",
+                },
+                {
+                    "title": "Veränderungen über den Tag",
+                    "payload": "Wie verhält sich mein Blutdruck über den Tag?",
+                }
+            ])
         return []
 
 
@@ -310,5 +324,6 @@ def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
             systolic_above_target,
             diastolic_above_target,
         )
+
 
     return trend_messages

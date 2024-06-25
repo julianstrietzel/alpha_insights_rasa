@@ -276,5 +276,22 @@ class ActionErweiterterBDStatus(Action):
 
         dispatcher.utter_message(systolic_message)
         dispatcher.utter_message(diastolic_message)
+
+        dispatcher.utter_message(
+            buttons=[
+                {
+                    "title": "Wendepunkte",
+                    "payload": "Wendepunkte in den Blutdruckwerten anzeigen",
+                },
+                {
+                    "title": "Werte außerhalb des Zielkorridors",
+                    "payload": "Gab es hohe systolische Messungen im letzten Monat?",
+                },
+                {
+                    "title": "Veränderungen über den Tag",
+                    "payload": "Wie verhält sich mein Blutdruck über den Tag?",
+                }
+            ])
+
         return []
         # Step 3: Calculate percentages for each category

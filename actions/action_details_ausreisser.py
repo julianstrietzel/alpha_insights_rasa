@@ -181,7 +181,17 @@ class ActionDetailsAusreisser(Action):
         else:
             dispatcher.utter_message(image=plot_box_and_outliers("systolisch"))
             dispatcher.utter_message(image=plot_box_and_outliers("diastolisch"))
-
+        dispatcher.utter_message(
+            buttons=[
+                {
+                    "title": "Wendepunkte",
+                    "payload": "Wendepunkte in den Blutdruckwerten anzeigen",
+                },
+                {
+                    "title": "Werte außerhalb des Zielkorridors",
+                    "payload": "Gab es hohe systolische Messungen im letzten Monat?",
+                },
+            ])
         return []
 
 
