@@ -34,7 +34,7 @@ class ActionDefogFallback(Action):
             patient_details["birthday"],
             (patient_details["medical_preconditions"] not in ["", None]),
         )
-        background_info_string_for_llm = f"Patient Information: {str(patient_details)}"
+        background_info_string_for_llm = f"Patient Information: {str(patient_details)}, BP Target Range: {systolic_range}/{diastolic_range}"
 
         defog_result = self.defog.ask_query(
             user_input, user_id, background_info_string_for_llm
@@ -57,7 +57,7 @@ class ActionDefogFallback(Action):
             f"potentially containing blood pressure and geo location data."
             f"Do not use any external sources, only the data provided."
             f"Do not mirror the user input or patient details, but provide a "
-            f"professional and short medical answer."
+            f"professional and short medical answer addressed to the doctor of the patient."
         )
         assistant = self.client.beta.assistants.create(
             model="gpt-4o",
@@ -71,7 +71,7 @@ class ActionDefogFallback(Action):
             + "\nPlease provide a professional medical answer to the provided question "
             "earlier based only on the provided data."
             "KEEP SHORT AND PROFESSIONAL OTHERWISE I'LL GET FIRED. DO NOT MAKE UP ANY UNKNOWN INFORMATION."
-            "Answer in German.",
+            "Answer in German to me as a healthcare professional in my language.",
         )
         self.client.beta.threads.runs.create_and_poll(
             thread_id=thread.id, assistant_id=assistant.id

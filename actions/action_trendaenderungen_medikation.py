@@ -188,8 +188,8 @@ class ActionTrendanderungenMedikation(Action):
         xticks = bp_data["Date_num"]
         xlabels = bp_data["Date"].dt.strftime("%Y-%m-%d")
         plt.xticks(
-            ticks=xticks[:: int(len(xticks) / 10)],
-            labels=xlabels[:: int(len(xticks) / 10)],
+            ticks=xticks[:: max(1, int(len(xticks) / 10))],
+            labels=xlabels[:: max(1, int(len(xticks) / 10))],
             rotation=45,
         )
 
@@ -218,6 +218,8 @@ class ActionTrendanderungenMedikation(Action):
         - Unterhalb des Ziels:\t{sys_below_after:.0f}% ({generate_arrow(sys_below_before, sys_below_after)}) systolisch,\t{dia_below_after:.0f}% ({generate_arrow(dia_below_before, dia_below_after)}) diastolisch
         - Über dem Ziel:\t{sys_above_after:.0f}% ({generate_arrow(sys_above_before, sys_above_after)}) systolisch,\t{dia_above_after:.0f}% ({generate_arrow(dia_above_before, dia_above_after)}) diastolisch
         """
+        ) if len(bp_data_after) > 0 else dispatcher.utter_message(
+            f"Es wurden keine Messungen nach dem {pretty_change_date} gefunden."
         )
         dispatcher.utter_message(
             f"""In den Wochen davor lagen die Messungen zwischen {sys_min_before}/{dia_min_before} mmHg und {sys_max_before}/{dia_max_before} mmHg und hatten einen Durchschnitt von {sys_avg_before:.2f}/{dia_avg_before:.2f} mmHg.
@@ -226,6 +228,8 @@ class ActionTrendanderungenMedikation(Action):
         - Unterhalb des Ziels:\t{sys_below_before:.0f}% systolisch,\t{dia_below_before:.0f}% diastolisch
         - Über dem Ziel:\t{sys_above_before:.0f}% systolisch,\t{dia_above_before:.0f}% diastolisch
         """
+        ) if len(bp_data_before) > 0 else dispatcher.utter_message(
+            f"Es wurden keine Messungen vor dem {pretty_change_date} gefunden."
         )
         dispatcher.utter_message(image=filename)
         dispatcher.utter_message(

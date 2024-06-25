@@ -87,6 +87,5 @@ class ActionAktuellerBDStatus(Action):
         dispatcher.utter_message(message, buttons=[{"title": "Mehr details zum aktuellen Blutdruck", "payload": "Wie hat sich der BD verhalten?"},
                                                     {"title": "Mehr details zur Person", "payload": "Patienteninformation"},
                                                     {"title": "Trends in den Blutdruckdaten", "payload": "Welche Trends sind im Blutdruck des Nutzers zu erkennen?"}])
-        dispatcher.utter_mes
 
         return []

@@ -254,6 +254,7 @@ nlu:
       - Wie haben sich die Blutdruckwerte des Patienten in den letzten [Tagen](timespan) verändert?
       - Welche Trends sind in den Blutdruckmessungen des Patienten in den letzten [Monaten](timespan) zu erkennen?
       - trends 
+      - Welche Trendänderungen gibt es?
       - trends seit [letztem Jahr](change_date)
       - BP trends seit dem [12. März](change_date)
 

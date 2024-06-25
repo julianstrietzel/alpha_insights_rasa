@@ -9,6 +9,10 @@ rules:
     steps:
       - intent: einleitung_bot_herausforderung
       - action: utter_bot_challenge
+  - rule: user id provided
+    steps:
+      - intent: benutzer_id_bereitstellen
+      - action: action_grund_info
   - rule: basic_user_details
     steps:
       - intent: grund_info

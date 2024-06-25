@@ -11,7 +11,7 @@ intents:
   - trendaenderungen_medikation
   - trends
   - veraenderungen_ueber_tag
-  - benutzer_id_bereitstellen # Currently not used!
+  - benutzer_id_bereitstellen
 
 
 responses:
@@ -102,7 +102,7 @@ slots:
     mappings:
       - type: from_entity
         entity: user_id
-        intent: provide_user_id
+        intent: benutzer_id_bereitstellen
       - type: custom
   nickname:
     type: text
