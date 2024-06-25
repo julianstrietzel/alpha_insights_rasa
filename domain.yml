@@ -26,8 +26,17 @@ responses:
     'Welche waren meine höchsten und niedrigsten Messwerte im letzten Monat?'\n
     'Können Sie mehr Details zu den Messungen über dem Zielbereich liefern?'\n
     'Hat sich der Blutdruck des Benutzers seit dem 12. Dezember verändert?'\n"
+      buttons:
+        - title: "Gab es Veränderungen in der Medikation?"
+          payload: "Hat sich der Blutdruck seit dem Medikamentenwechsel verändert?"
+        - title: "Werte außerhalb des Zielkorridors"
+          payload: "Gab es hohe systolische Messungen im letzten Monat?"
+        - title: "Veränderungen über den Tag"
+          payload: "Wie verhält sich mein Blutdruck über den Tag?"
 
-
+  
+  
+  
   utter_ask_user_id:
     - text: "Please provide the user ID"
     - text: "What is the user ID?"
