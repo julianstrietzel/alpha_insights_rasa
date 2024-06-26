@@ -8,4 +8,4 @@ matplotlib
 ruptures
 scikit-learn
 dateparser
-defog[portgres]
+defog[postgres]
