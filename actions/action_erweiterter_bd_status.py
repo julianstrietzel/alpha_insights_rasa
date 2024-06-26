@@ -290,8 +290,9 @@ class ActionErweiterterBDStatus(Action):
                 {
                     "title": "Veränderungen über den Tag",
                     "payload": "Wie verhält sich mein Blutdruck über den Tag?",
-                }
-            ])
+                },
+            ]
+        )
 
         return []
         # Step 3: Calculate percentages for each category

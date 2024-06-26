@@ -50,6 +50,9 @@ class ActionTrends(Action):
             """
 
         results = DBHandler().execute_query(query)
+        if not results:
+            dispatcher.utter_message("Keine Daten gefunden.")
+            return []
         bp_data = pd.DataFrame(
             results, columns=["Systolisch", "Diastolisch", "Puls", "Datum"]
         )
@@ -174,8 +177,9 @@ class ActionTrends(Action):
                 {
                     "title": "Veränderungen über den Tag",
                     "payload": "Wie verhält sich mein Blutdruck über den Tag?",
-                }
-            ])
+                },
+            ]
+        )
         return []
 
 
@@ -324,6 +328,5 @@ def generate_trend_messages(bp_data, systolisch_span, diastolic_span):
             systolic_above_target,
             diastolic_above_target,
         )
-
 
     return trend_messages

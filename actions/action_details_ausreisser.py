@@ -84,9 +84,11 @@ class ActionDetailsAusreisser(Action):
         )
 
         def plot_box_and_outliers(typ=typ):
-            color = "red" if typ=="systolisch" else "blue"
+            color = "red" if typ == "systolisch" else "blue"
             plt.figure(figsize=(10, 6))
-            sns.boxplot(x=zeitspanne.capitalize(), y=typ.capitalize(), data=df, color=color)
+            sns.boxplot(
+                x=zeitspanne.capitalize(), y=typ.capitalize(), data=df, color=color
+            )
             sns.scatterplot(
                 x=zeitspanne.capitalize(),
                 y=typ.capitalize(),
@@ -191,7 +193,8 @@ class ActionDetailsAusreisser(Action):
                     "title": "Werte außerhalb des Zielkorridors",
                     "payload": "Gab es hohe systolische Messungen im letzten Monat?",
                 },
-            ])
+            ]
+        )
         return []
 
 

@@ -157,6 +157,7 @@ class ActionGrundInfo(Action):
                 {
                     "title": "Veränderungen über den Tag",
                     "payload": "Wie verhält sich mein Blutdruck über den Tag?",
-                }
-            ])
+                },
+            ]
+        )
         return slot_events

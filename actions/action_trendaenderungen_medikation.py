@@ -43,6 +43,9 @@ class ActionTrendanderungenMedikation(Action):
                         ORDER BY recorded_at ASC
                     """
         results = DBHandler().execute_query(query)
+        if not results:
+            dispatcher.utter_message("Keine Daten gefunden.")
+            return []
         bp_data = pd.DataFrame(
             results, columns=["Systolic", "Diastolic", "Pulse", "Date"]
         )
@@ -210,26 +213,34 @@ class ActionTrendanderungenMedikation(Action):
             else:
                 return "→"
 
-        dispatcher.utter_message(
-            f"""
+        (
+            dispatcher.utter_message(
+                f"""
         In den Wochen nach dem {pretty_change_date} lagen die Blutdruckmessungen zwischen {sys_min_after}/{dia_min_after} und {sys_max_after}/{dia_max_after} mmHg und hatten einen Durchschnitt von {sys_avg_after:.2f}({generate_arrow(sys_avg_before, sys_avg_after)})/{dia_avg_after:.2f}({generate_arrow(dia_avg_before, dia_avg_after)}) mmHg.
         
         - Innerhalb des Ziels:\t{sys_within_after:.0f}% ({generate_arrow(sys_within_before, sys_within_after)}) systolisch,\t{dia_within_after:.0f}% ({generate_arrow(dia_within_before, dia_within_after)}) diastolisch
         - Unterhalb des Ziels:\t{sys_below_after:.0f}% ({generate_arrow(sys_below_before, sys_below_after)}) systolisch,\t{dia_below_after:.0f}% ({generate_arrow(dia_below_before, dia_below_after)}) diastolisch
         - Über dem Ziel:\t{sys_above_after:.0f}% ({generate_arrow(sys_above_before, sys_above_after)}) systolisch,\t{dia_above_after:.0f}% ({generate_arrow(dia_above_before, dia_above_after)}) diastolisch
         """
-        ) if len(bp_data_after) > 0 else dispatcher.utter_message(
-            f"Es wurden keine Messungen nach dem {pretty_change_date} gefunden."
+            )
+            if len(bp_data_after) > 0
+            else dispatcher.utter_message(
+                f"Es wurden keine Messungen nach dem {pretty_change_date} gefunden."
+            )
         )
-        dispatcher.utter_message(
-            f"""In den Wochen davor lagen die Messungen zwischen {sys_min_before}/{dia_min_before} mmHg und {sys_max_before}/{dia_max_before} mmHg und hatten einen Durchschnitt von {sys_avg_before:.2f}/{dia_avg_before:.2f} mmHg.
+        (
+            dispatcher.utter_message(
+                f"""In den Wochen davor lagen die Messungen zwischen {sys_min_before}/{dia_min_before} mmHg und {sys_max_before}/{dia_max_before} mmHg und hatten einen Durchschnitt von {sys_avg_before:.2f}/{dia_avg_before:.2f} mmHg.
         
         - Innerhalb des Ziels:\t{sys_within_before:.0f}% systolisch,\t{dia_within_before:.0f}% diastolisch
         - Unterhalb des Ziels:\t{sys_below_before:.0f}% systolisch,\t{dia_below_before:.0f}% diastolisch
         - Über dem Ziel:\t{sys_above_before:.0f}% systolisch,\t{dia_above_before:.0f}% diastolisch
         """
-        ) if len(bp_data_before) > 0 else dispatcher.utter_message(
-            f"Es wurden keine Messungen vor dem {pretty_change_date} gefunden."
+            )
+            if len(bp_data_before) > 0
+            else dispatcher.utter_message(
+                f"Es wurden keine Messungen vor dem {pretty_change_date} gefunden."
+            )
         )
         dispatcher.utter_message(image=filename)
         dispatcher.utter_message(
@@ -245,6 +256,7 @@ class ActionTrendanderungenMedikation(Action):
                 {
                     "title": "Veränderungen über den Tag",
                     "payload": "Wie verhält sich mein Blutdruck über den Tag?",
-                }
-            ])
+                },
+            ]
+        )
         return []

@@ -110,6 +110,7 @@ nlu:
       - Benutzer [2](user_id)
       - [2](user_id)
       - Hi [1900413](user_id)
+      - Hallo [25601](user_id 
       - Ich möchte die Daten für Benutzer [12345](user_id) abrufen
       - Die ID des Benutzers ist [5678](user_id)
       - Für die ID [9876](user_id), bitte

@@ -171,16 +171,25 @@ class ActionAblesungenAusserhalbZielbereich(Action):
             hue="Tageszeit",
             palette="rocket",
             alpha=0.6,  # Adjust transparency for better visibility
-            marginal_kws=dict(common_norm=False)  # Ensure KDE plots are not normalized together
+            marginal_kws=dict(
+                common_norm=False
+            ),  # Ensure KDE plots are not normalized together
         )
 
         # Set the titles and labels
-        joint_plot.set_axis_labels("Systolisch (mmHg)\nBlutdruckmessungen gruppiert nach Tageszeit", "Diastolisch (mmHg)")
+        joint_plot.set_axis_labels(
+            "Systolisch (mmHg)\nBlutdruckmessungen gruppiert nach Tageszeit",
+            "Diastolisch (mmHg)",
+        )
 
         # Adding blood pressure spans to the joint plot
         systolic_span, diastolic_span, _ = get_blood_pressure_spans(tracker, user_id)
-        joint_plot.ax_joint.axvspan(systolic_span[0], systolic_span[1], color="green", alpha=0.1)
-        joint_plot.ax_joint.axhspan(diastolic_span[0], diastolic_span[1], color="green", alpha=0.1)
+        joint_plot.ax_joint.axvspan(
+            systolic_span[0], systolic_span[1], color="green", alpha=0.1
+        )
+        joint_plot.ax_joint.axhspan(
+            diastolic_span[0], diastolic_span[1], color="green", alpha=0.1
+        )
 
         # plt to image and send
         file_path = str(
@@ -188,6 +197,17 @@ class ActionAblesungenAusserhalbZielbereich(Action):
             / ("tmp_scatter_plot_" + str(datetime.now()) + ".png")
         )
         plt.savefig(file_path)
-        dispatcher.utter_message(image=str(file_path), buttons=[{"title": "Zeig Wendepunkte in den BD Daten. ", "payload": "Veränderungen im Blutdrucktrend in den letzten 3 Monaten."},
-                                                                    {"title": "Details über Ausreißer", "payload": "Haben Sie außergewöhnliche Blutdruckwerte festgestellt?"}])
+        dispatcher.utter_message(image=str(file_path))
+        dispatcher.utter_message(
+            buttons=[
+                {
+                    "title": "Zeig Wendepunkte in den BD Daten. ",
+                    "payload": "Veränderungen im Blutdrucktrend in den letzten 3 Monaten.",
+                },
+                {
+                    "title": "Details über Ausreißer",
+                    "payload": "Haben Sie außergewöhnliche Blutdruckwerte festgestellt?",
+                },
+            ]
+        )
         return []

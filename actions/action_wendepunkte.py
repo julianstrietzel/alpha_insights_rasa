@@ -183,8 +183,9 @@ class ActionWendepunkte(Action):
                 {
                     "title": "Veränderungen über den Tag",
                     "payload": "Wie verhält sich mein Blutdruck über den Tag?",
-                }
-            ])
+                },
+            ]
+        )
 
 
 def init_method_run(tracker):
