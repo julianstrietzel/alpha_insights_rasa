@@ -4,7 +4,7 @@ from typing import Optional, Text, Any
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.interfaces import Action, Tracker
 
-from actions.action_wendepunkte import ActionWendepunkte
+from actions.action_grund_info import ActionGrundInfo
 
 
 class MockDispatcher(CollectingDispatcher):
@@ -12,7 +12,7 @@ class MockDispatcher(CollectingDispatcher):
         self.messages = []
         super().__init__()
 
-    def utter_message(self, text: Optional[Text] = None, image: Optional[Text] = None):
+    def utter_message(self, text: Optional[Text] = None, image: Optional[Text] = None, buttons = None):
         if text:
             self.messages.append(text)
         else:
@@ -49,7 +49,7 @@ class TestClient:
 
 
 async def main():
-    action = ActionWendepunkte()
+    action = ActionGrundInfo()
     client = TestClient(action)
 
     messages, slots = await client.invoke_message(
@@ -57,7 +57,7 @@ async def main():
         slots={
             "health": "good",
             "geo": "9384z5bj",
-            "user_id": "25601",
+            "user_id": "1900413",
             "nickname": "testuser",
             "title": "testtitle",
             "home_longitude": "0.0",

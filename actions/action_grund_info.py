@@ -65,13 +65,13 @@ class ActionGrundInfo(Action):
                 """
                 sex = patient_details["sex"]
                 pre_existing_conditions = patient_details["medical_preconditions"]
-                result = self.dbhandler.execute_query(query)[0]
-                if not result:
+                result = self.dbhandler.execute_query(query)
+                if not result or len(result) == 0:
                     dispatcher.utter_message(
                         "No blood pressure records found for the past three months for the provided user id."
                     )
                     return patient_details
-
+                result = result[0]
                 print(sex)
 
                 total = result[10]

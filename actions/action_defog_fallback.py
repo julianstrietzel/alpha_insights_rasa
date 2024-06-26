@@ -70,7 +70,7 @@ class ActionDefogFallback(Action):
             + pretty_data
             + "\nPlease provide a professional medical answer to the provided question "
             "earlier based only on the provided data."
-            "KEEP SHORT AND PROFESSIONAL OTHERWISE I'LL GET FIRED. DO NOT MAKE UP ANY UNKNOWN INFORMATION."
+            "KEEP SHORT AND PROFESSIONAL OTHERWISE I'LL GET FIRED. DO NOT MAKE UP ANY UNKNOWN INFORMATION AND MAKE THE ANSWER SHORT AND INTERPRETABLE"
             "Answer in German to me as a healthcare professional in my language.",
         )
         self.client.beta.threads.runs.create_and_poll(
