@@ -21,17 +21,33 @@ st.write("Talk to the bot by typing your message and hitting enter.")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-def send_message():
-    user_message = st.session_state.user_message
+if "buttons" not in st.session_state:
+    st.session_state.buttons = []
+
+if "user_message" not in st.session_state:
+    st.session_state.user_message = ""
+
+if "last_button_payload" not in st.session_state:
+    st.session_state.last_button_payload = None
+
+def send_message(user_message):
     if user_message:
         st.session_state.messages.append({"sender": "You", "message": user_message})
         responses = get_bot_response(user_message)
+        st.session_state.buttons = []
         for response in responses:
             if "image" in response:
                 st.session_state.messages.append({"sender": "Bot", "image": response["image"]})
+            elif "buttons" in response:
+                st.session_state.messages.append({"sender": "Bot", "message": response.get("text", "").replace('\n', '<br>')})
+                st.session_state.buttons = response["buttons"]
             else:
                 st.session_state.messages.append({"sender": "Bot", "message": response.get("text", "").replace('\n', '<br>')})
         st.session_state.user_message = ""
+
+def on_text_input_change():
+    send_message(st.session_state.user_message)
+    st.session_state.user_message = ""
 
 st.markdown("""
     <style>
@@ -70,6 +86,8 @@ for msg in st.session_state.messages:
         if "image" in msg:
             st.image(msg["image"])
         else:
+            if msg['message'] == "":
+                continue
             st.markdown(
                 '<div class="chat-container"><div class="chat-bubble bot-bubble"><pre>{}</pre></div></div>'.format(
                     msg["message"].replace("\n", "<br>")
@@ -77,7 +95,14 @@ for msg in st.session_state.messages:
                 unsafe_allow_html=True,
             )
 
-st.text_input("You: ", key="user_message", on_change=send_message)
+# Display action buttons from Rasa
+if st.session_state.buttons:
+    st.write("Please choose an option:")
+    for i, button in enumerate(st.session_state.buttons):
+        if st.button(button["title"], key=f"button_{i}"):
+            st.session_state.last_button_payload = button["payload"]
+            send_message(st.session_state.last_button_payload)
+            st.session_state.last_button_payload = None
+            st.rerun()
 
-if st.session_state.user_message:
-    send_message()
+st.text_input("You: ", key="user_message", on_change=on_text_input_change)
