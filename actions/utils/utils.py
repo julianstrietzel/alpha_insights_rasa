@@ -110,23 +110,24 @@ def get_bp_range(birthdate, has_pre_existing_conditions):
         2: [70, 79],  # >65 with pre-existing conditions
         3: [71, 84],  # others
     }
+    category = 3
+    if birthdate not in ["", None, ""]:
+        # Calculate age from birthdate
+        birthdate = datetime.strptime(birthdate, "%Y-%m-%d")
+        today = datetime.today()
+        age = (
+            today.year
+            - birthdate.year
+            - ((today.month, today.day) < (birthdate.month, birthdate.day))
+        )
 
-    # Calculate age from birthdate
-    birthdate = datetime.strptime(birthdate, "%Y-%m-%d")
-    today = datetime.today()
-    age = (
-        today.year
-        - birthdate.year
-        - ((today.month, today.day) < (birthdate.month, birthdate.day))
-    )
-
-    if has_pre_existing_conditions:
-        if age < 65:
-            category = 1
+        if has_pre_existing_conditions:
+            if age < 65:
+                category = 1
+            else:
+                category = 2
         else:
-            category = 2
-    else:
-        category = 3
+            category = 3
 
     systolic_range = systolicTarget[category]
     diastolic_range = diastolicTarget[category]

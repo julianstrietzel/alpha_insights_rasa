@@ -49,5 +49,9 @@ rules:
     steps:
       - intent: veraenderungen_ueber_tag
       - action: action_veraenderungen_ueber_tag
+  - rule: liste alle bd werte auf
+    steps:
+      - intent: auflisten_bd
+      - action: action_auflisten_bd
 
 

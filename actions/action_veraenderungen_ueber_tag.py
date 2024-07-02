@@ -33,9 +33,9 @@ class ActionVeraenderungUeberTag(Action):
         )
 
         ref_date = (
-            (pd.Timestamp.now() - pd.DateOffset(months=3)).replace(day=1)
-            if not change_date
-            else change_date_parsed
+            (
+                change_date_parsed or pd.Timestamp.now() - pd.DateOffset(months=3)
+            ).replace(day=1)
         ).strftime("%Y-%m-%d")
         ref_date_parsed = datetime.strptime(ref_date, "%Y-%m-%d")
 

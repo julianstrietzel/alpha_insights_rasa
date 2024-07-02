@@ -20,7 +20,7 @@ class ActionDetailsAusreisser(Action):
 
     def run(self, dispatcher, tracker, domain):
         user_id = tracker.get_slot("user_id") or 25601
-        typ = tracker.get_slot("typ") or None
+        typ = tracker.get_slot("type") or None
         zeitspanne = next(tracker.get_latest_entity_values("timespan"), None)
         change_date_input = tracker.get_slot("change_date") or None
         if change_date_input:

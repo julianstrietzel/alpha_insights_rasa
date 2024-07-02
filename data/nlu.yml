@@ -6,6 +6,7 @@ nlu:
       - systolisch
       - systolischer
       - systolische
+      - systolischen
       - systol
       - oberer Wert
       - oberer Blutdruck
@@ -16,6 +17,7 @@ nlu:
       - diastolisch
       - diastolischer
       - diastolische
+      - diastolischen
       - diast
       - unterer Wert
       - unterer Blutdruck
@@ -173,6 +175,19 @@ nlu:
       - Wie hat sich der BD verhalten?
       - BD seit [letztem Monat](change_date)
       - BD nach dem [13. August](change_date)
+
+  - intent: auflisten_bd
+    examples: |
+      - Liste alle [systolischen](type) Messungen im letzten [Monat](timespan) auf
+      - Zeige alle [diastolischen](type) Blutdruckmessungen des letzten [Monats](timespan)
+      - Kannst du alle [systolischen](type) Messungen des letzten [Monats](timespan) auflisten?
+      - Ich möchte alle [diastolischen](type) Blutdruckmessungen des letzten [Monats](timespan) sehen
+      - Zeige mir [systolischen](type) Blutdruckwerte des letzten [Monats](timespan)
+      - Können Sie alle [systolischen](type) Blutdruckmessungen des letzten [Monats](timespan) anzeigen?
+      - Ich möchte alle [diastolischen](type) Werte des letzten [Monats](timespan) überprüfen
+      - Zeige mir alle Messungen des letzten [Monats](timespan)
+      - Ich möchte alle [systolischen](type) Blutdruckwerte des letzten [Monats](timespan) einsehen
+      - Können Sie mir alle Messungen des letzten [Monats](timespan) zeigen?
 
   - intent: ablesungen_ausserhalb_zielbereich
     examples: |

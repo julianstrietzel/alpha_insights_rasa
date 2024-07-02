@@ -171,15 +171,17 @@ class ActionTrendanderungenMedikation(Action):
             alpha=0.5,
         )
 
-        # Add vertical line for the event date
-        respective_id = bp_data[bp_data["Date"] <= change_date].iloc[-1]["Date_num"]
-        plt.axvline(
-            x=respective_id,
-            color="black",
-            linestyle="--",
-            label="Änderungsdatum" + f" ({pretty_change_date})",
-            linewidth=1,
-        )
+        filters = bp_data["Date"] <= change_date
+        if filters.any():
+            # Add vertical line for the event date
+            respective_id = bp_data[filters].iloc[-1]["Date_num"]
+            plt.axvline(
+                x=respective_id,
+                color="black",
+                linestyle="--",
+                label="Änderungsdatum" + f" ({pretty_change_date})",
+                linewidth=1,
+            )
 
         # Add titles and labels
         plt.title(

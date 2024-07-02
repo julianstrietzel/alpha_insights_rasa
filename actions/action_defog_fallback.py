@@ -52,7 +52,7 @@ class ActionDefogFallback(Action):
         instructions = (
             f"You are trying to answer the following question: '{user_input}'\n"
             f"You will be provided with data to answer the question."
-            f"About the following user {patient_details}"
+            f"About the following user {patient_details} (filter only by its id)."
             f"'You will be provided with data to answer the question from the database "
             f"potentially containing blood pressure and geo location data."
             f"Do not use any external sources, only the data provided."

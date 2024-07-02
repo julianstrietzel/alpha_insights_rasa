@@ -31,6 +31,17 @@ class ActionGrundInfo(Action):
             return []
         try:
             patient_details = get_patient_details(user_id, force_reload=True)
+            slot_events = (
+                [
+                    SlotSet(key, value)
+                    for key, value in (
+                        patient_details.items() if patient_details.items() else []
+                    )
+                    if value is not None
+                ]
+                if patient_details
+                else []
+            )
             if patient_details:
                 systolic_range, diastolic_range = get_bp_range(
                     patient_details["birthday"],
@@ -70,7 +81,8 @@ class ActionGrundInfo(Action):
                     dispatcher.utter_message(
                         "No blood pressure records found for the past three months for the provided user id."
                     )
-                    return patient_details
+
+                    return slot_events
                 result = result[0]
                 print(sex)
 
@@ -135,15 +147,8 @@ class ActionGrundInfo(Action):
 
         except Exception as e:
             dispatcher.utter_message(f"An error occurred: {e}")
-        slot_events = (
-            [
-                SlotSet(key, value)
-                for key, value in patient_details.items()
-                if value is not None
-            ]
-            if patient_details
-            else []
-        )
+            raise e
+
         dispatcher.utter_message(
             buttons=[
                 {

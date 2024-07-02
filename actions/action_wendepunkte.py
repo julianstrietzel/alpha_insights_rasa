@@ -50,6 +50,14 @@ class ActionWendepunkte(Action):
         data["recorded_at_ordinal"] = data["recorded_at"].apply(lambda x: x.toordinal())
 
         def analyze_inflection_points(data, typ, span):
+            min_points_required = (
+                20  # Each segment must have at least 5 points, 4 segments required
+            )
+            if len(data) < min_points_required:
+                dispatcher.utter_message(
+                    f"Es sind zu wenige Datenpunkte vorhanden, um Wendepunkte im {typ}en Blutdruck zu identifizieren."
+                )
+                return
             signal = data[typ].values
             data["idx"] = range(len(data))
             color = "red" if typ == "systolisch" else "blue"
@@ -134,16 +142,16 @@ class ActionWendepunkte(Action):
             for s in summary:
                 dispatcher.utter_message(s)
             if change_date_parsed:
-                respective_id = data[
-                    data["recorded_at"] <= pd.to_datetime(change_date_parsed)
-                ].iloc[-1]["idx"]
-                plt.axvline(
-                    x=respective_id,
-                    color="g",
-                    linestyle="--",
-                    label="Änderungsdatum"
-                    + f' ({change_date_parsed.strftime("%d.%m.%Y")})',
-                )
+                filtered = data["recorded_at"] <= pd.to_datetime(change_date_parsed)
+                if filtered.any():
+                    respective_id = data[filtered].iloc[-1]["idx"]
+                    plt.axvline(
+                        x=respective_id,
+                        color="g",
+                        linestyle="--",
+                        label="Änderungsdatum"
+                        + f' ({change_date_parsed.strftime("%d.%m.%Y")})',
+                    )
             filename = str(
                 pathlib.Path().parent.absolute()
                 / f"tmp_{user_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{typ}_wendepunkte.png"
@@ -190,7 +198,7 @@ class ActionWendepunkte(Action):
 
 def init_method_run(tracker):
     user_id = tracker.get_slot("user_id") or 25601
-    typ = tracker.get_slot("typ") or None
+    typ = tracker.get_slot("type") or None
     zeitspanne = next(tracker.get_latest_entity_values("timespan"), None)
     change_date = tracker.get_slot("change_date") or None
     change_date_parsed = (
