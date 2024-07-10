@@ -13,6 +13,8 @@ intents:
   - veraenderungen_ueber_tag
   - benutzer_id_bereitstellen
   - auflisten_bd
+  - ask_gpt
+  - ask_defog
 
 
 responses:

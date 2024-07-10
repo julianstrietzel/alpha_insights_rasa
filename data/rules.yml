@@ -54,4 +54,14 @@ rules:
       - intent: auflisten_bd
       - action: action_auflisten_bd
 
+  - rule: trigger gpt fallback
+    steps:
+      - intent: ask_gpt
+      - action: action_gpt_fallback
+
+  - rule: trigger defog fallback
+    steps:
+      - intent: ask_defog
+      - action: action_defog_fallback
+
 

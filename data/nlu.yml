@@ -275,8 +275,6 @@ nlu:
       - trends seit [letztem Jahr](change_date)
       - BP trends seit dem [12. März](change_date)
 
-
-
   - intent: veraenderungen_ueber_tag
     examples: |
       - Welche Muster oder Veränderungen in den Blutdruckmessungen können Sie aufgrund der Tageszeit feststellen?
@@ -314,3 +312,48 @@ nlu:
       - Gibt es Muster in den [diastolischen](type) Messungen im Tagesverlauf?
       - Wie variieren die [systolischen](type) Blutdruckwerte im Tagesverlauf?
       - Welche signifikanten Veränderungen gibt es im [diastolischen](type) Blutdruck je nach Tageszeit?
+
+  - intent: ask_gpt
+    examples: |
+      - Let me talk to gpt
+      - give me llm 
+      - use gpt 4
+      - ask gpt whether there was something special in the data
+      - ask gpt about the user's blood pressure
+      - ask gpt about the user's medical preconditions
+      - ask gpt about the user's blood pressure trends
+      - ask gpt  ask gpt  We changed the medicine of the user 1 month ago. Could you compare the blood pressure values before and after?
+
+  - intent: ask_defog
+    examples: |
+      - Let me talk to defog
+      - give me defog 
+      - use defog
+      - ask defog whether there was something special in the data
+      - ask defog about the user's blood pressure
+      - ask defog about the user's medical preconditions
+      - ask defog about the user's blood pressure trends
+      - ask defog  We changed the medicine of the user 1 month ago. Could you compare the blood pressure values before and after?
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
