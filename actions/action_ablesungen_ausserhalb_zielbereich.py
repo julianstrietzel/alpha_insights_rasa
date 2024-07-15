@@ -59,6 +59,8 @@ class ActionAblesungenAusserhalbZielbereich(Action):
         results = recorded_at_to_datetime(results)
         count_bp_measurements = len(results)
         systolic_span, diastolic_span, _ = get_blood_pressure_spans(tracker, user_id)
+        if limit:
+            limit = int(limit)
         if typ == "systolisch" and limit:
             systolic_span = (limit, limit)
         elif typ == "diastolisch" and limit:
