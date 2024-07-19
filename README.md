@@ -1,6 +1,6 @@
 # Patient Report Insights Summary Module (PRISM) - NLP SEBA LAB 2024 @ sebis TUM
 
-By [Julian Strietzel](mailto:julian.strietzel@tum.de), [Tim Baum](mailto:tim.baum@tum.de), [Nils Rehtanz](mailto:nils.rehtanz@tum.de), [Marc Sinner](mailto:marc.sinner@tum.de)
+By [Julian Strietzel](mailto:julian.strietzel@tum.de), [Nils Rehtanz](mailto:nils.rehtanz@tum.de), [Tim Baum](mailto:tim.baum@tum.de), [Marc Sinner](mailto:marc.sinner@tum.de)
 
 ## Introduction
 

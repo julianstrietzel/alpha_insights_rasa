@@ -315,7 +315,7 @@ def utter_quote_outliers_recently(
         )
 
 
-# Alle diese Messungen wurden am Morgen vorgenommen. / Von diesen waren 50% (sys) und 100% (diastolisch) am Morgen.
+# Alle diese Messungen wurden am Morgen vorgenommen. / Von diesen waren 50% (sys) und 100 % (diastolisch) am Morgen.
 # 50% (sys) und 100% (dias) der Ausreißer lagen über dem Zielbereich. /
 def utter_outliers_daytime(df, df_recently, diastolic_span, dispatcher, systolic_span):
     recent_sys_outliers = df_recently[df_recently["Systolische Ausreißer"]]
